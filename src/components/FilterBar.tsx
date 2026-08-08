@@ -49,14 +49,14 @@ export function FilterBar({ setNames, filters, onFilterChange }: FilterBarProps)
         maxLength={100}
         placeholder="Search by player or team..."
         aria-label="Search by player or team"
-        className="w-full md:flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+        className="w-full md:flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
       />
 
       <select
         value={filters.setName ?? ''}
         onChange={handleSetNameChange}
         aria-label="Filter by set"
-        className="w-full md:w-48 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+        className="w-full md:w-48 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
       >
         <option value="">All Sets</option>
         {setNames.map((name) => (
@@ -70,7 +70,7 @@ export function FilterBar({ setNames, filters, onFilterChange }: FilterBarProps)
         value={filters.collectedStatus}
         onChange={handleStatusChange}
         aria-label="Filter by collected status"
-        className="w-full md:w-40 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+        className="w-full md:w-40 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
       >
         <option value="all">All</option>
         <option value="collected">Collected</option>

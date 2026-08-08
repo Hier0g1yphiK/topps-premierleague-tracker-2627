@@ -5,6 +5,7 @@ import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useToggleCollected } from '../hooks/useToggleCollected';
 import { useServiceWorker } from '../hooks/useServiceWorker';
+import { useDarkMode } from '../hooks/useDarkMode';
 import { applyFilters, extractSetNames } from '../lib/filters';
 import { sortCards } from '../lib/sort';
 import { saveCardsToCache, loadCardsFromCache } from '../lib/offline-cache';
@@ -38,6 +39,7 @@ export function AppShell() {
   const isOnline = useOnlineStatus();
   const isOffline = !isOnline;
   const { needsRefresh, updateServiceWorker } = useServiceWorker();
+  const { isDark, toggle: toggleDarkMode } = useDarkMode();
 
   // Fetch all cards on mount
   const fetchCards = useCallback(async () => {
@@ -141,7 +143,7 @@ export function AppShell() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
       {/* Update prompt */}
       <UpdatePrompt show={needsRefresh} onReload={updateServiceWorker} />
 
@@ -149,7 +151,7 @@ export function AppShell() {
       <OfflineBanner isOffline={isOffline} />
 
       {/* Header */}
-      <header className="bg-purple-700 text-white p-4 shadow-md">
+      <header className="bg-purple-700 dark:bg-gray-800 text-white p-4 shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-xl sm:text-2xl font-bold">
             Premier League Card Tracker
@@ -158,8 +160,24 @@ export function AppShell() {
             <ConnectionIndicator status={connectionStatus} onRetry={retry} />
             <button
               type="button"
+              onClick={toggleDarkMode}
+              className="inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-purple-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-white min-h-[44px] min-w-[44px]"
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDark ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+            <button
+              type="button"
               onClick={() => setIsImportOpen(true)}
-              className="inline-flex items-center px-3 py-2 rounded-md bg-purple-600 text-white text-sm font-medium hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-700 min-h-[44px] min-w-[44px]"
+              className="inline-flex items-center px-3 py-2 rounded-md bg-purple-600 dark:bg-purple-700 text-white text-sm font-medium hover:bg-purple-500 dark:hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-700 min-h-[44px] min-w-[44px]"
               aria-label="Import CSV"
             >
               <svg
@@ -188,7 +206,7 @@ export function AppShell() {
         <StatsBar cards={cards} />
 
         {/* FilterBar */}
-        <section aria-label="Filters" className="bg-white rounded-lg shadow p-4">
+        <section aria-label="Filters" className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           <FilterBar
             setNames={setNames}
             filters={filters}
@@ -197,7 +215,7 @@ export function AppShell() {
         </section>
 
         {/* CardList */}
-        <section aria-label="Card list" className="bg-white rounded-lg shadow p-4">
+        <section aria-label="Card list" className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           <CardList
             cards={sortedCards}
             sortConfig={sortConfig}

@@ -102,12 +102,14 @@ export function ImportModal({ isOpen, onClose, onImportComplete }: ImportModalPr
       setSummary(importSummary);
       setState('complete');
       onImportComplete(importSummary);
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Import error:', err);
       const errorSummary: ImportSummary = {
         inserted: 0,
         skipped: 0,
         rejected: 0,
-        errors: [{ row: 0, reason: 'An unexpected error occurred during import' }],
+        errors: [{ row: 0, reason: message || 'An unexpected error occurred during import' }],
       };
       setSummary(errorSummary);
       setState('complete');
@@ -253,11 +255,13 @@ async function batchUpsert(
     team: row.team.trim(),
     notes: row.notes,
     collected: false,
+    user_id: null,
   }));
 
+  // Use the composite unique constraint (user_id, card_number) for conflict detection
   const { data, error } = await supabase
     .from('cards')
-    .upsert(records, { onConflict: 'cards_card_number_null_user', ignoreDuplicates: true })
+    .upsert(records, { onConflict: 'user_id,card_number', ignoreDuplicates: true })
     .select('id');
 
   if (error) {

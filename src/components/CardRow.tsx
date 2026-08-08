@@ -20,8 +20,8 @@ export function CardRowDesktop({ card, onToggleCollected, isToggling }: CardRowP
     <tr
       className={`cursor-pointer transition-colors ${
         card.collected
-          ? 'bg-green-50 hover:bg-green-100'
-          : 'bg-white hover:bg-gray-50'
+          ? 'bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50'
+          : 'bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700'
       } ${isToggling ? 'opacity-50' : ''}`}
       onClick={handleToggle}
       role="button"
@@ -34,11 +34,11 @@ export function CardRowDesktop({ card, onToggleCollected, isToggling }: CardRowP
         }
       }}
     >
-      <td className="px-4 py-3 text-sm text-gray-900 font-medium">{card.card_number}</td>
-      <td className="px-4 py-3 text-sm text-gray-700">{card.set_name}</td>
-      <td className="px-4 py-3 text-sm text-gray-700">{card.set_card_number}</td>
-      <td className="px-4 py-3 text-sm text-gray-900">{card.player}</td>
-      <td className="px-4 py-3 text-sm text-gray-700">{card.team}</td>
+      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium">{card.card_number}</td>
+      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{card.set_name}</td>
+      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{card.set_card_number}</td>
+      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{card.player}</td>
+      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{card.team}</td>
       <td className="px-4 py-3 text-sm text-center">
         {isToggling ? (
           <span className="inline-block w-5 h-5 border-2 border-gray-300 border-t-purple-600 rounded-full animate-spin" aria-label="Toggling" />
@@ -70,19 +70,19 @@ export function CardRowMobile({ card, onToggleCollected, isToggling }: CardRowPr
     <div
       className={`rounded-lg border p-4 transition-colors ${
         card.collected
-          ? 'bg-green-50 border-green-200'
-          : 'bg-white border-gray-200'
+          ? 'bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800'
+          : 'bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700'
       } ${isToggling ? 'opacity-50' : ''}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900 truncate">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
             #{card.card_number} — {card.player}
           </p>
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
             {card.team}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {card.set_name} · #{card.set_card_number}
           </p>
         </div>

@@ -234,13 +234,37 @@ function containsBinaryContent(content: string): boolean {
 }
 
 /**
- * Reads a File as text using FileReader for broad environment compatibility.
+ * Reads a File as text, trying UTF-8 first. If the result contains replacement
+ * characters (suggesting wrong encoding), falls back to Windows-1252.
+ * Also strips the UTF-8 BOM if present.
  */
 function readFileAsText(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
+    reader.onload = () => {
+      let text = reader.result as string;
+      // Strip UTF-8 BOM if present
+      if (text.charCodeAt(0) === 0xFEFF) {
+        text = text.slice(1);
+      }
+      // If we see replacement characters, the file probably isn't UTF-8
+      if (text.includes('\uFFFD')) {
+        // Re-read as Windows-1252 (common for Excel-exported CSVs)
+        const reader2 = new FileReader();
+        reader2.onload = () => {
+          let text2 = reader2.result as string;
+          if (text2.charCodeAt(0) === 0xFEFF) {
+            text2 = text2.slice(1);
+          }
+          resolve(text2);
+        };
+        reader2.onerror = () => reject(new Error('Failed to read file'));
+        reader2.readAsText(file, 'windows-1252');
+      } else {
+        resolve(text);
+      }
+    };
     reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsText(file);
+    reader.readAsText(file, 'UTF-8');
   });
 }

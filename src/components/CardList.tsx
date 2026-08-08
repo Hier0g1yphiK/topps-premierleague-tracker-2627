@@ -45,7 +45,7 @@ export function CardList({
     return (
       <div className="flex items-center justify-center py-12" role="status" aria-label="Loading cards">
         <span className="inline-block w-8 h-8 border-4 border-gray-200 border-t-purple-600 rounded-full animate-spin" />
-        <span className="ml-3 text-sm text-gray-500">Loading cards...</span>
+        <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">Loading cards...</span>
       </div>
     );
   }
@@ -54,7 +54,7 @@ export function CardList({
   if (cards.length === 0) {
     return (
       <div className="flex items-center justify-center py-12 text-center">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {hasActiveFilters
             ? 'No cards match the current filters.'
             : 'No cards available. Import a CSV to get started.'}
@@ -68,11 +68,11 @@ export function CardList({
       {/* Desktop table (≥768px) */}
       <table className="hidden md:table w-full border-collapse">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50">
+          <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
             {COLUMNS.map((col) => (
               <th
                 key={col.key}
-                className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100 transition-colors"
+                className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 onClick={() => onSortChange(col.key)}
                 aria-sort={
                   sortConfig.column === col.key
@@ -91,7 +91,7 @@ export function CardList({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
           {cards.map((card) => (
             <CardRowDesktop
               key={card.id}
