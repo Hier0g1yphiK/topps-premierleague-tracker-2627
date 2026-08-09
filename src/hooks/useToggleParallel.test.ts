@@ -1,19 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { useToggleCollected } from './useToggleCollected'
-import type { Card } from '../types'
+import { useToggleParallel } from './useToggleParallel'
+import type { CardParallel } from '../types'
 
-function makeCard(overrides: Partial<Card> = {}): Card {
+function makeParallel(overrides: Partial<CardParallel> = {}): CardParallel {
   return {
-    id: 'card-1',
-    user_id: null,
-    card_number: 1,
-    set_name: 'Base',
-    set_card_number: '1',
-    player: 'Erling Haaland',
-    team: 'Manchester City',
-    notes: null,
+    id: 'parallel-1',
+    card_id: 'card-1',
+    parallel_name: 'Blue Voltage',
     collected: false,
     date_collected: null,
     created_at: '2025-01-01T00:00:00Z',
@@ -40,66 +35,68 @@ function createMockSupabase(options: { shouldFail?: boolean; delay?: number } = 
   return { from: fromFn, _updateFn: updateFn, _eqFn: eqFn } as any
 }
 
-describe('useToggleCollected', () => {
-  let updateCards: ReturnType<typeof vi.fn>
+describe('useToggleParallel', () => {
+  let updateParallels: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
-    updateCards = vi.fn()
+    updateParallels = vi.fn()
   })
 
-  it('toggles an uncollected card to collected optimistically', async () => {
+  it('toggles an uncollected parallel to collected optimistically', async () => {
     const supabase = createMockSupabase()
-    const { result } = renderHook(() => useToggleCollected(supabase, updateCards))
+    const { result } = renderHook(() => useToggleParallel(supabase, updateParallels))
 
-    const card = makeCard({ collected: false, date_collected: null })
+    const parallel = makeParallel({ collected: false, date_collected: null })
 
     await act(async () => {
-      await result.current.toggleCard(card)
+      await result.current.toggleParallel(parallel)
     })
 
-    // Should have called updateCards with the optimistic update
-    expect(updateCards).toHaveBeenCalled()
-    const updater = updateCards.mock.calls[0][0]
-    const updated = updater([card])
+    // Should have called updateParallels with the optimistic update
+    expect(updateParallels).toHaveBeenCalled()
+    const updater = updateParallels.mock.calls[0][0]
+    const updated = updater([parallel])
     expect(updated[0].collected).toBe(true)
     expect(updated[0].date_collected).toBe(new Date().toISOString().split('T')[0])
   })
 
-  it('toggles a collected card to uncollected optimistically', async () => {
+  it('toggles a collected parallel to uncollected optimistically', async () => {
     const supabase = createMockSupabase()
-    const { result } = renderHook(() => useToggleCollected(supabase, updateCards))
+    const { result } = renderHook(() => useToggleParallel(supabase, updateParallels))
 
-    const card = makeCard({ collected: true, date_collected: '2025-06-01' })
+    const parallel = makeParallel({ collected: true, date_collected: '2025-06-01' })
 
     await act(async () => {
-      await result.current.toggleCard(card)
+      await result.current.toggleParallel(parallel)
     })
 
-    const updater = updateCards.mock.calls[0][0]
-    const updated = updater([card])
+    const updater = updateParallels.mock.calls[0][0]
+    const updated = updater([parallel])
     expect(updated[0].collected).toBe(false)
     expect(updated[0].date_collected).toBeNull()
   })
 
   it('reverts optimistic update on persist failure', async () => {
     const supabase = createMockSupabase({ shouldFail: true })
-    const { result } = renderHook(() => useToggleCollected(supabase, updateCards))
+    const { result } = renderHook(() => useToggleParallel(supabase, updateParallels))
 
-    const card = makeCard({ collected: false, date_collected: null })
+    const parallel = makeParallel({ collected: false, date_collected: null })
 
     await act(async () => {
-      await result.current.toggleCard(card)
+      await result.current.toggleParallel(parallel)
     })
 
     // First call is optimistic update, second call is revert
-    expect(updateCards).toHaveBeenCalledTimes(2)
-    const revertUpdater = updateCards.mock.calls[1][0]
-    const reverted = revertUpdater([{ ...card, collected: true, date_collected: '2025-07-01' }])
+    expect(updateParallels).toHaveBeenCalledTimes(2)
+    const revertUpdater = updateParallels.mock.calls[1][0]
+    const reverted = revertUpdater([
+      { ...parallel, collected: true, date_collected: '2025-07-01' },
+    ])
     expect(reverted[0].collected).toBe(false)
     expect(reverted[0].date_collected).toBeNull()
   })
 
-  it('tracks toggling card ids', async () => {
+  it('tracks toggling IDs (adds during in-flight, removes after)', async () => {
     let resolveRequest: () => void
     const pendingPromise = new Promise<{ error: null }>((resolve) => {
       resolveRequest = () => resolve({ error: null })
@@ -109,17 +106,17 @@ describe('useToggleCollected', () => {
     const updateFn = vi.fn().mockReturnValue({ eq: eqFn })
     const supabase = { from: vi.fn().mockReturnValue({ update: updateFn }) } as any
 
-    const { result } = renderHook(() => useToggleCollected(supabase, updateCards))
-    const card = makeCard()
+    const { result } = renderHook(() => useToggleParallel(supabase, updateParallels))
+    const parallel = makeParallel()
 
     // Start toggle but don't resolve yet
     let togglePromise: Promise<void>
     act(() => {
-      togglePromise = result.current.toggleCard(card)
+      togglePromise = result.current.toggleParallel(parallel)
     })
 
-    // Card should be in togglingIds
-    expect(result.current.togglingIds.has('card-1')).toBe(true)
+    // Parallel should be in togglingIds
+    expect(result.current.togglingIds.has('parallel-1')).toBe(true)
 
     // Resolve the request
     await act(async () => {
@@ -127,8 +124,8 @@ describe('useToggleCollected', () => {
       await togglePromise!
     })
 
-    // Card should no longer be in togglingIds
-    expect(result.current.togglingIds.has('card-1')).toBe(false)
+    // Parallel should no longer be in togglingIds
+    expect(result.current.togglingIds.has('parallel-1')).toBe(false)
   })
 
   it('queues rapid taps and persists only the final state', async () => {
@@ -146,26 +143,26 @@ describe('useToggleCollected', () => {
     const updateFn = vi.fn().mockReturnValue({ eq: eqFn })
     const supabase = { from: vi.fn().mockReturnValue({ update: updateFn }) } as any
 
-    const { result } = renderHook(() => useToggleCollected(supabase, updateCards))
+    const { result } = renderHook(() => useToggleParallel(supabase, updateParallels))
 
-    const card = makeCard({ collected: false, date_collected: null })
+    const parallel = makeParallel({ collected: false, date_collected: null })
 
     // First toggle: uncollected -> collected (goes in-flight)
     let firstToggle: Promise<void>
     act(() => {
-      firstToggle = result.current.toggleCard(card)
+      firstToggle = result.current.toggleParallel(parallel)
     })
 
     // Second toggle while first is in-flight: collected -> uncollected (queued)
-    const cardAfterFirst = makeCard({ collected: true, date_collected: '2025-07-01' })
+    const parallelAfterFirst = makeParallel({ collected: true, date_collected: '2025-07-01' })
     act(() => {
-      result.current.toggleCard(cardAfterFirst)
+      result.current.toggleParallel(parallelAfterFirst)
     })
 
     // Third toggle while first is in-flight: uncollected -> collected (overwrites queue)
-    const cardAfterSecond = makeCard({ collected: false, date_collected: null })
+    const parallelAfterSecond = makeParallel({ collected: false, date_collected: null })
     act(() => {
-      result.current.toggleCard(cardAfterSecond)
+      result.current.toggleParallel(parallelAfterSecond)
     })
 
     // Resolve the first request - should then process the final queued state
@@ -187,12 +184,12 @@ describe('useToggleCollected', () => {
 
   it('does not queue if no subsequent taps occur', async () => {
     const supabase = createMockSupabase()
-    const { result } = renderHook(() => useToggleCollected(supabase, updateCards))
+    const { result } = renderHook(() => useToggleParallel(supabase, updateParallels))
 
-    const card = makeCard({ collected: false })
+    const parallel = makeParallel({ collected: false })
 
     await act(async () => {
-      await result.current.toggleCard(card)
+      await result.current.toggleParallel(parallel)
     })
 
     // Only one persist call

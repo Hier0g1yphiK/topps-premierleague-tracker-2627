@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CardList } from './CardList';
-import type { Card, SortConfig } from '../types';
+import type { Card, CardParallel, SortConfig } from '../types';
 
 function makeCard(overrides: Partial<Card> = {}): Card {
   return {
@@ -21,6 +21,9 @@ function makeCard(overrides: Partial<Card> = {}): Card {
 }
 
 const defaultSortConfig: SortConfig = { column: 'card_number', direction: 'asc' };
+const emptyParallelsMap = new Map<string, CardParallel[]>();
+const noopToggleParallel = vi.fn();
+const emptyTogglingParallelIds = new Set<string>();
 
 describe('CardList', () => {
   it('renders loading spinner when isLoading is true', () => {
@@ -80,6 +83,9 @@ describe('CardList', () => {
         onToggleCollected={vi.fn()}
         isLoading={false}
         togglingIds={new Set()}
+        parallelsMap={emptyParallelsMap}
+        onToggleParallel={noopToggleParallel}
+        togglingParallelIds={emptyTogglingParallelIds}
       />
     );
 
@@ -100,6 +106,9 @@ describe('CardList', () => {
         onToggleCollected={vi.fn()}
         isLoading={false}
         togglingIds={new Set()}
+        parallelsMap={emptyParallelsMap}
+        onToggleParallel={noopToggleParallel}
+        togglingParallelIds={emptyTogglingParallelIds}
       />
     );
 
@@ -122,6 +131,9 @@ describe('CardList', () => {
         onToggleCollected={vi.fn()}
         isLoading={false}
         togglingIds={new Set()}
+        parallelsMap={emptyParallelsMap}
+        onToggleParallel={noopToggleParallel}
+        togglingParallelIds={emptyTogglingParallelIds}
       />
     );
 
@@ -140,6 +152,9 @@ describe('CardList', () => {
         onToggleCollected={vi.fn()}
         isLoading={false}
         togglingIds={new Set()}
+        parallelsMap={emptyParallelsMap}
+        onToggleParallel={noopToggleParallel}
+        togglingParallelIds={emptyTogglingParallelIds}
       />
     );
 

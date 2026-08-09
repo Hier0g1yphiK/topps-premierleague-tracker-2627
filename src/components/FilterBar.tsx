@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { FilterState } from '../types';
+import type { FilterState, ParallelFilterStatus } from '../types';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 
 interface FilterBarProps {
@@ -40,6 +40,13 @@ export function FilterBar({ setNames, filters, onFilterChange }: FilterBarProps)
     });
   }
 
+  function handleParallelStatusChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    onFilterChange({
+      ...filters,
+      parallelStatus: e.target.value as ParallelFilterStatus,
+    });
+  }
+
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
       <input
@@ -75,6 +82,17 @@ export function FilterBar({ setNames, filters, onFilterChange }: FilterBarProps)
         <option value="all">All</option>
         <option value="collected">Collected</option>
         <option value="missing">Missing</option>
+      </select>
+
+      <select
+        value={filters.parallelStatus}
+        onChange={handleParallelStatusChange}
+        aria-label="Filter by parallel status"
+        className="w-full md:w-56 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+      >
+        <option value="all">All</option>
+        <option value="has_uncollected">Has uncollected parallels</option>
+        <option value="all_collected">All parallels collected</option>
       </select>
     </div>
   );

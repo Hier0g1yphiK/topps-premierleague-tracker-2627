@@ -85,16 +85,18 @@ export function ImportModal({ isOpen, onClose, onImportComplete }: ImportModalPr
 
       let inserted = 0;
       let skipped = 0;
+      let parallelsCreated = 0;
 
       if (validRows.length > 0) {
         const result = await batchUpsert(validRows);
         inserted = result.inserted;
         skipped = result.skipped;
+        parallelsCreated = result.parallelsCreated;
       }
 
       const importSummary: ImportSummary = {
         inserted,
-        parallelsCreated: 0,
+        parallelsCreated,
         skipped,
         rejected,
         errors,
@@ -157,7 +159,7 @@ export function ImportModal({ isOpen, onClose, onImportComplete }: ImportModalPr
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
                 Select a CSV file to import cards. The file should contain columns:
-                card_number, set_name, set_card_number, player, team, and optionally notes.
+                card_number, set_name (or set), set_card_number, player, team, and optionally notes and parallel.
               </p>
               <input
                 ref={fileInputRef}
@@ -184,10 +186,14 @@ export function ImportModal({ isOpen, onClose, onImportComplete }: ImportModalPr
           {state === 'complete' && summary && (
             <div className="space-y-4">
               {/* Summary counts */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="bg-green-50 border border-green-200 rounded-md p-3 text-center">
                   <p className="text-2xl font-bold text-green-700">{summary.inserted}</p>
-                  <p className="text-xs text-green-600">Inserted</p>
+                  <p className="text-xs text-green-600">Cards Inserted</p>
+                </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-md p-3 text-center">
+                  <p className="text-2xl font-bold text-purple-700">{summary.parallelsCreated}</p>
+                  <p className="text-xs text-purple-600">Parallels Created</p>
                 </div>
                 <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-center">
                   <p className="text-2xl font-bold text-yellow-700">{summary.skipped}</p>
@@ -243,13 +249,24 @@ export function ImportModal({ isOpen, onClose, onImportComplete }: ImportModalPr
 }
 
 /**
- * Batch upserts valid rows to Supabase.
- * Uses ON CONFLICT DO NOTHING to skip duplicates.
+ * Batch upserts valid rows to Supabase, including card_parallels.
+ * 1. Upserts cards (with ignoreDuplicates: false to get back ids for all rows)
+ * 2. Maps card_number → card_id from upsert results
+ * 3. Upserts card_parallels using (card_id, parallel_name) as unique key
  */
 async function batchUpsert(
   rows: ParsedRow[]
-): Promise<{ inserted: number; skipped: number }> {
-  const records = rows.map((row) => ({
+): Promise<{ inserted: number; skipped: number; parallelsCreated: number }> {
+  // Deduplicate cards by card_number (last occurrence wins for card fields)
+  const cardMap = new Map<number, ParsedRow>();
+  for (const row of rows) {
+    const cardNum = parseInt(row.card_number, 10);
+    if (!cardMap.has(cardNum)) {
+      cardMap.set(cardNum, row);
+    }
+  }
+
+  const uniqueCardRecords = Array.from(cardMap.values()).map((row) => ({
     card_number: parseInt(row.card_number, 10),
     set_name: row.set_name.trim(),
     set_card_number: row.set_card_number.trim(),
@@ -260,18 +277,54 @@ async function batchUpsert(
     user_id: null,
   }));
 
-  // Use the composite unique constraint (user_id, card_number) for conflict detection
-  const { data, error } = await supabase
+  // Upsert cards with ignoreDuplicates: false so we get back ids for existing cards too
+  const { data: cardData, error: cardError } = await supabase
     .from('cards')
-    .upsert(records, { onConflict: 'user_id,card_number', ignoreDuplicates: true })
-    .select('id');
+    .upsert(uniqueCardRecords, { onConflict: 'user_id,card_number', ignoreDuplicates: false })
+    .select('id, card_number');
 
-  if (error) {
-    throw new Error(`Supabase upsert failed: ${error.message}`);
+  if (cardError) {
+    throw new Error(`Supabase card upsert failed: ${cardError.message}`);
   }
 
-  const inserted = data?.length ?? 0;
-  const skipped = rows.length - inserted;
+  // Build card_number → id map
+  const cardNumberToId = new Map<number, string>();
+  if (cardData) {
+    for (const card of cardData) {
+      cardNumberToId.set(card.card_number, card.id);
+    }
+  }
 
-  return { inserted, skipped };
+  const inserted = cardData?.length ?? 0;
+  const skipped = uniqueCardRecords.length - inserted;
+
+  // Build parallel records from all valid rows
+  const parallelRecords = rows
+    .map((row) => {
+      const cardId = cardNumberToId.get(parseInt(row.card_number, 10));
+      if (!cardId) return null;
+      return {
+        card_id: cardId,
+        parallel_name: row.parallel_name,
+        collected: false,
+      };
+    })
+    .filter((r): r is { card_id: string; parallel_name: string; collected: boolean } => r !== null);
+
+  let parallelsCreated = 0;
+
+  if (parallelRecords.length > 0) {
+    const { data: parallelData, error: parallelError } = await supabase
+      .from('card_parallels')
+      .upsert(parallelRecords, { onConflict: 'card_id,parallel_name', ignoreDuplicates: true })
+      .select('id');
+
+    if (parallelError) {
+      throw new Error(`Supabase parallel upsert failed: ${parallelError.message}`);
+    }
+
+    parallelsCreated = parallelData?.length ?? 0;
+  }
+
+  return { inserted, skipped, parallelsCreated };
 }

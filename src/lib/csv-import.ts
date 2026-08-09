@@ -7,13 +7,27 @@ export interface ParsedRow {
   player: string;
   team: string;
   notes: string | null;
+  parallel_name: string;
 }
 
 const REQUIRED_HEADERS = ['card_number', 'set_name', 'set_card_number', 'player', 'team'];
 
+/** Header aliases: maps alternative header names to canonical names */
+const HEADER_ALIASES: Record<string, string> = {
+  set: 'set_name',
+};
+
+/**
+ * Normalizes a header name by applying known aliases.
+ */
+function normalizeHeader(header: string): string {
+  const trimmed = header.trim().toLowerCase();
+  return HEADER_ALIASES[trimmed] ?? trimmed;
+}
+
 /**
  * Parses CSV text content into an array of ParsedRow objects.
- * Expects headers in the first row: card_number, set_name, set_card_number, player, team, notes
+ * Expects headers in the first row: card_number, set_name (or "set"), set_card_number, player, team, notes, parallel (optional)
  */
 export function parseCSV(fileContent: string): ParsedRow[] {
   const lines = fileContent.split(/\r?\n/).filter((line) => line.trim() !== '');
@@ -22,7 +36,9 @@ export function parseCSV(fileContent: string): ParsedRow[] {
     return [];
   }
 
-  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
+  const rawHeaders = parseCsvLine(lines[0]);
+  const headers = rawHeaders.map((h) => normalizeHeader(h));
+  const hasParallelColumn = headers.includes('parallel');
 
   const rows: ParsedRow[] = [];
   for (let i = 1; i < lines.length; i++) {
@@ -32,6 +48,13 @@ export function parseCSV(fileContent: string): ParsedRow[] {
       row[headers[j]] = values[j]?.trim() ?? '';
     }
 
+    // Determine parallel_name: use column value if present, default to "Base" if missing/empty
+    let parallelName = 'Base';
+    if (hasParallelColumn) {
+      const rawParallel = row['parallel']?.trim() ?? '';
+      parallelName = rawParallel === '' ? 'Base' : rawParallel;
+    }
+
     rows.push({
       card_number: row['card_number'] ?? '',
       set_name: row['set_name'] ?? '',
@@ -39,6 +62,7 @@ export function parseCSV(fileContent: string): ParsedRow[] {
       player: row['player'] ?? '',
       team: row['team'] ?? '',
       notes: row['notes']?.trim() || null,
+      parallel_name: parallelName,
     });
   }
 
@@ -131,6 +155,14 @@ export function validateRow(
     };
   }
 
+  // parallel_name: must be non-empty after trim
+  if (!row.parallel_name.trim()) {
+    return {
+      valid: false,
+      error: { row: rowIndex, reason: 'parallel_name is required' },
+    };
+  }
+
   return { valid: true };
 }
 
@@ -183,7 +215,7 @@ export async function processCSVFile(
 
   // Validate headers - use parseCsvLine to handle quoted headers
   const headerValues = parseCsvLine(lines[0]);
-  const headers = headerValues.map((h) => h.trim().toLowerCase());
+  const headers = headerValues.map((h) => normalizeHeader(h));
   const missingHeaders = REQUIRED_HEADERS.filter((h) => !headers.includes(h));
   if (missingHeaders.length > 0) {
     return {

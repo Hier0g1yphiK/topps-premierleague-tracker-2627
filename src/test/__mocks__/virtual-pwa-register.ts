@@ -13,7 +13,7 @@ type RegisterSWOptions = {
 
 // Store callbacks so tests can trigger them
 let _options: RegisterSWOptions = {};
-let _updateFn = (_reloadPage?: boolean) => Promise.resolve();
+let _updateFn = (_reloadPage?: boolean) => Promise.resolve(); // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export function registerSW(options?: RegisterSWOptions): (reloadPage?: boolean) => Promise<void> {
   _options = options || {};
@@ -39,5 +39,5 @@ export function __triggerOfflineReady() {
 
 export function __reset() {
   _options = {};
-  _updateFn = (_reloadPage?: boolean) => Promise.resolve();
+  _updateFn = (_reloadPage?: boolean) => Promise.resolve(); // eslint-disable-line @typescript-eslint/no-unused-vars
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { sortCards, DEFAULT_SORT_CONFIG } from '../sort';
+import { sortCards } from '../sort';
 import type { Card, SortColumn, SortConfig } from '../../types';
 
 /**
@@ -43,10 +43,6 @@ const sortConfigArbitrary: fc.Arbitrary<SortConfig> = fc.record({
 });
 
 // --- Helpers ---
-
-function getCompareValue(card: Card, column: SortColumn): string | number | boolean {
-  return card[column];
-}
 
 function adjacentPairsSatisfyOrdering(sorted: Card[], config: SortConfig): boolean {
   const { column, direction } = config;

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import type { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js';
-import type { Card } from '../types';
+import type { Card, CardParallel } from '../types';
 import { createReconnectionManager } from '../lib/reconnection';
 import type { ReconnectionManager } from '../lib/reconnection';
 
@@ -9,6 +9,7 @@ export type ConnectionStatus = 'connected' | 'reconnecting' | 'disconnected';
 export interface UseRealtimeSubscriptionOptions {
   supabase: SupabaseClient;
   onCardUpdate: (card: Card) => void;
+  onParallelUpdate: (parallel: CardParallel) => void;
   onStatusChange?: (status: ConnectionStatus) => void;
   onReconnected?: () => void;
 }
@@ -21,6 +22,7 @@ export interface UseRealtimeSubscriptionResult {
 export function useRealtimeSubscription({
   supabase,
   onCardUpdate,
+  onParallelUpdate,
   onStatusChange,
   onReconnected,
 }: UseRealtimeSubscriptionOptions): UseRealtimeSubscriptionResult {
@@ -28,6 +30,7 @@ export function useRealtimeSubscription({
   const channelRef = useRef<RealtimeChannel | null>(null);
   const reconnectionManagerRef = useRef<ReconnectionManager | null>(null);
   const onCardUpdateRef = useRef(onCardUpdate);
+  const onParallelUpdateRef = useRef(onParallelUpdate);
   const onStatusChangeRef = useRef(onStatusChange);
   const onReconnectedRef = useRef(onReconnected);
 
@@ -35,6 +38,10 @@ export function useRealtimeSubscription({
   useEffect(() => {
     onCardUpdateRef.current = onCardUpdate;
   }, [onCardUpdate]);
+
+  useEffect(() => {
+    onParallelUpdateRef.current = onParallelUpdate;
+  }, [onParallelUpdate]);
 
   useEffect(() => {
     onStatusChangeRef.current = onStatusChange;
@@ -72,6 +79,28 @@ export function useRealtimeSubscription({
         },
         (payload) => {
           onCardUpdateRef.current(payload.new as Card);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'card_parallels',
+        },
+        (payload) => {
+          onParallelUpdateRef.current(payload.new as CardParallel);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'card_parallels',
+        },
+        (payload) => {
+          onParallelUpdateRef.current(payload.new as CardParallel);
         }
       )
       .subscribe((subscriptionStatus) => {
@@ -125,6 +154,20 @@ export function useRealtimeSubscription({
               { event: 'UPDATE', schema: 'public', table: 'cards' },
               (payload) => {
                 onCardUpdateRef.current(payload.new as Card);
+              }
+            )
+            .on(
+              'postgres_changes',
+              { event: 'INSERT', schema: 'public', table: 'card_parallels' },
+              (payload) => {
+                onParallelUpdateRef.current(payload.new as CardParallel);
+              }
+            )
+            .on(
+              'postgres_changes',
+              { event: 'UPDATE', schema: 'public', table: 'card_parallels' },
+              (payload) => {
+                onParallelUpdateRef.current(payload.new as CardParallel);
               }
             )
             .subscribe((subscriptionStatus) => {

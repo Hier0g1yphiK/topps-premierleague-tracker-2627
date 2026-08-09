@@ -1,4 +1,4 @@
-import type { Card } from '../types';
+import type { Card, CardParallel } from '../types';
 
 export interface OverallStats {
   collected: number;
@@ -63,4 +63,78 @@ export function computePerSetBreakdown(cards: Card[]): SetBreakdown[] {
   breakdowns.sort((a, b) => a.minCardNumber - b.minCardNumber);
 
   return breakdowns.map(({ setName, collected, total }) => ({ setName, collected, total }));
+}
+
+
+export interface ParallelStats {
+  totalCollected: number;
+  totalAvailable: number;
+  percentage: string;
+}
+
+export interface SetParallelBreakdown {
+  setName: string;
+  parallelsCollected: number;
+  parallelsTotal: number;
+}
+
+/**
+ * Computes overall parallel collection statistics from a CardParallel array.
+ * Returns totalCollected count, totalAvailable count, and percentage rounded to 1 decimal place.
+ * Handles empty array by returning "0.0%".
+ */
+export function computeParallelStats(parallels: CardParallel[]): ParallelStats {
+  if (parallels.length === 0) {
+    return { totalCollected: 0, totalAvailable: 0, percentage: '0.0%' };
+  }
+
+  const totalCollected = parallels.filter((p) => p.collected === true).length;
+  const totalAvailable = parallels.length;
+  const percentage = ((totalCollected / totalAvailable) * 100).toFixed(1) + '%';
+
+  return { totalCollected, totalAvailable, percentage };
+}
+
+/**
+ * Computes per-set breakdown of parallel collection progress.
+ * Groups parallels by their card's set_name, counts collected/total per group.
+ */
+export function computePerSetParallelBreakdown(
+  cards: Card[],
+  parallels: CardParallel[]
+): SetParallelBreakdown[] {
+  if (parallels.length === 0) {
+    return [];
+  }
+
+  // Build a map from card_id to set_name
+  const cardToSet = new Map<string, string>();
+  for (const card of cards) {
+    cardToSet.set(card.id, card.set_name);
+  }
+
+  // Group parallels by set_name
+  const groups = new Map<string, CardParallel[]>();
+  for (const parallel of parallels) {
+    const setName = cardToSet.get(parallel.card_id);
+    if (setName === undefined) {
+      // Parallel's card not found in cards array — skip
+      continue;
+    }
+    const group = groups.get(setName);
+    if (group) {
+      group.push(parallel);
+    } else {
+      groups.set(setName, [parallel]);
+    }
+  }
+
+  const breakdowns: SetParallelBreakdown[] = [];
+  for (const [setName, groupParallels] of groups) {
+    const parallelsCollected = groupParallels.filter((p) => p.collected === true).length;
+    const parallelsTotal = groupParallels.length;
+    breakdowns.push({ setName, parallelsCollected, parallelsTotal });
+  }
+
+  return breakdowns;
 }

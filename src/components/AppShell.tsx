@@ -1,14 +1,24 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import type { Card, FilterState, SortConfig, SortColumn } from '../types';
+import type { Card, CardParallel, FilterState, SortConfig, SortColumn } from '../types';
 import { supabase } from '../lib/supabase';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useToggleCollected } from '../hooks/useToggleCollected';
+import { useToggleParallel } from '../hooks/useToggleParallel';
 import { useServiceWorker } from '../hooks/useServiceWorker';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { applyFilters, extractSetNames } from '../lib/filters';
+import { filterByParallelStatus } from '../lib/parallel-filters';
 import { sortCards } from '../lib/sort';
-import { saveCardsToCache, loadCardsFromCache } from '../lib/offline-cache';
+import {
+  saveCardsToCache,
+  loadCardsFromCache,
+  saveParallelsToCache,
+  loadParallelsFromCache,
+  loadPendingParallelToggles,
+  clearPendingParallelToggles,
+} from '../lib/offline-cache';
+import { persistParallelToggle } from '../lib/parallel-toggle';
 import { StatsBar } from './StatsBar';
 import { FilterBar } from './FilterBar';
 import { CardList } from './CardList';
@@ -31,6 +41,7 @@ const DEFAULT_SORT_CONFIG: SortConfig = {
 
 export function AppShell() {
   const [cards, setCards] = useState<Card[]>([]);
+  const [parallels, setParallels] = useState<CardParallel[]>([]);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sortConfig, setSortConfig] = useState<SortConfig>(DEFAULT_SORT_CONFIG);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,18 +53,35 @@ export function AppShell() {
   const { needsRefresh, updateServiceWorker } = useServiceWorker();
   const { isDark, toggle: toggleDarkMode } = useDarkMode();
 
-  // Fetch all cards on mount
+  // Toggle parallel hook
+  const { toggleParallel, togglingIds: togglingParallelIds } = useToggleParallel(supabase, setParallels);
+
+  // Derive parallelsMap from parallels state
+  const parallelsMap = useMemo(() => {
+    const map = new Map<string, CardParallel[]>();
+    for (const p of parallels) {
+      const existing = map.get(p.card_id);
+      if (existing) {
+        existing.push(p);
+      } else {
+        map.set(p.card_id, [p]);
+      }
+    }
+    return map;
+  }, [parallels]);
+
+  // Fetch all cards and parallels on mount
   const fetchCards = useCallback(async () => {
     setIsLoading(true);
-    const { data, error } = await supabase
-      .from('cards')
-      .select('*')
-      .order('card_number');
 
-    if (!error && data) {
-      setCards(data as Card[]);
-      // Cache cards for offline use
-      saveCardsToCache(data as Card[]).catch(() => {
+    const [cardsResult, parallelsResult] = await Promise.all([
+      supabase.from('cards').select('*').order('card_number'),
+      supabase.from('card_parallels').select('*'),
+    ]);
+
+    if (!cardsResult.error && cardsResult.data) {
+      setCards(cardsResult.data as Card[]);
+      saveCardsToCache(cardsResult.data as Card[]).catch(() => {
         // Silently ignore cache save failures
       });
     } else {
@@ -67,6 +95,24 @@ export function AppShell() {
         // No cached data available
       }
     }
+
+    if (!parallelsResult.error && parallelsResult.data) {
+      setParallels(parallelsResult.data as CardParallel[]);
+      saveParallelsToCache(parallelsResult.data as CardParallel[]).catch(() => {
+        // Silently ignore cache save failures
+      });
+    } else {
+      // On fetch failure, try loading from offline cache
+      try {
+        const cached = await loadParallelsFromCache();
+        if (cached.length > 0) {
+          setParallels(cached);
+        }
+      } catch {
+        // No cached data available
+      }
+    }
+
     setIsLoading(false);
   }, []);
 
@@ -87,19 +133,49 @@ export function AppShell() {
     });
   }, []);
 
+  // Realtime parallel update handler
+  const handleParallelUpdate = useCallback((updatedParallel: CardParallel) => {
+    setParallels((prev) => {
+      const idx = prev.findIndex((p) => p.id === updatedParallel.id);
+      if (idx >= 0) {
+        const updated = [...prev];
+        updated[idx] = { ...updated[idx], ...updatedParallel };
+        return updated;
+      }
+      return [...prev, updatedParallel];
+    });
+  }, []);
+
   // Realtime subscription
   const { status: connectionStatus, retry } = useRealtimeSubscription({
     supabase,
     onCardUpdate: handleCardUpdate,
+    onParallelUpdate: handleParallelUpdate,
     onReconnected: async () => {
-      // Re-fetch cards to reconcile any missed updates
-      const { data } = await supabase
-        .from('cards')
-        .select('*')
-        .order('card_number');
-      if (data) {
-        setCards(data as Card[]);
-        saveCardsToCache(data as Card[]).catch(() => {});
+      // Re-fetch cards and parallels to reconcile any missed updates
+      const [cardsRes, parallelsRes] = await Promise.all([
+        supabase.from('cards').select('*').order('card_number'),
+        supabase.from('card_parallels').select('*'),
+      ]);
+
+      if (cardsRes.data) {
+        setCards(cardsRes.data as Card[]);
+        saveCardsToCache(cardsRes.data as Card[]).catch(() => {});
+      }
+      if (parallelsRes.data) {
+        setParallels(parallelsRes.data as CardParallel[]);
+        saveParallelsToCache(parallelsRes.data as CardParallel[]).catch(() => {});
+      }
+
+      // Sync pending offline toggles
+      try {
+        const pending = await loadPendingParallelToggles();
+        for (const toggle of pending) {
+          await persistParallelToggle(supabase, toggle.parallelId, toggle.collected, toggle.date_collected);
+        }
+        await clearPendingParallelToggles();
+      } catch {
+        // Silently ignore sync failures — will retry on next reconnection
       }
     },
   });
@@ -128,9 +204,14 @@ export function AppShell() {
     [cards, filters]
   );
 
+  const filteredByParallel = useMemo(
+    () => filterByParallelStatus(filteredCards, parallelsMap, filters.parallelStatus),
+    [filteredCards, parallelsMap, filters.parallelStatus]
+  );
+
   const sortedCards = useMemo(
-    () => sortCards(filteredCards, sortConfig),
-    [filteredCards, sortConfig]
+    () => sortCards(filteredByParallel, sortConfig),
+    [filteredByParallel, sortConfig]
   );
 
   const setNames = useMemo(() => extractSetNames(cards), [cards]);
@@ -139,7 +220,8 @@ export function AppShell() {
     () =>
       filters.searchText !== '' ||
       filters.setName !== null ||
-      filters.collectedStatus !== 'all',
+      filters.collectedStatus !== 'all' ||
+      filters.parallelStatus !== 'all',
     [filters]
   );
 
@@ -204,7 +286,7 @@ export function AppShell() {
       {/* Main content */}
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 space-y-4">
         {/* StatsBar */}
-        <StatsBar cards={cards} />
+        <StatsBar cards={cards} parallels={parallels} />
 
         {/* FilterBar */}
         <section aria-label="Filters" className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -225,6 +307,9 @@ export function AppShell() {
             isLoading={isLoading}
             togglingIds={togglingIds}
             hasActiveFilters={hasActiveFilters}
+            parallelsMap={parallelsMap}
+            onToggleParallel={toggleParallel}
+            togglingParallelIds={togglingParallelIds}
           />
         </section>
       </main>

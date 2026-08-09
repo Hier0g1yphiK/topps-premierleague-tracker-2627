@@ -5,6 +5,21 @@ import { AppShell } from '../components/AppShell';
 import { saveCardsToCache } from '../lib/offline-cache';
 import type { Card } from '../types';
 
+// --- Mock window.matchMedia ---
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 // --- Mock Supabase ---
 const mockSelect = vi.fn();
 const mockOrder = vi.fn();
@@ -62,11 +77,20 @@ function createMockCard(overrides: Partial<Card> = {}): Card {
 function setupSupabaseFetch(cards: Card[]) {
   mockOrder.mockResolvedValue({ data: cards, error: null });
   mockSelect.mockReturnValue({ order: mockOrder });
-  mockFrom.mockImplementation(() => ({
-    select: () => ({ order: mockOrder }),
-    upsert: mockUpsert,
-    update: mockUpdate,
-  }));
+  mockFrom.mockImplementation((table: string) => {
+    if (table === 'card_parallels') {
+      return {
+        select: () => Promise.resolve({ data: [], error: null }),
+        upsert: mockUpsert,
+        update: mockUpdate,
+      };
+    }
+    return {
+      select: () => ({ order: mockOrder }),
+      upsert: mockUpsert,
+      update: mockUpdate,
+    };
+  });
   mockEq.mockResolvedValue({ data: null, error: null });
   mockUpdate.mockReturnValue({ eq: mockEq });
   mockUpsert.mockReturnValue({ select: vi.fn().mockResolvedValue({ data: [], error: null }) });
@@ -78,6 +102,7 @@ const originalOnLineDescriptor = Object.getOwnPropertyDescriptor(navigator, 'onL
 beforeEach(() => {
   vi.clearAllMocks();
   // Reset IndexedDB between tests
+  // eslint-disable-next-line no-global-assign
   indexedDB = new IDBFactory();
 });
 
@@ -113,11 +138,20 @@ describe('Integration: CSV import → cards appear in list', () => {
       error: null,
     });
 
-    mockFrom.mockImplementation(() => ({
-      select: () => ({ order: mockOrderFn }),
-      upsert: () => ({ select: mockUpsertSelect }),
-      update: mockUpdate,
-    }));
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'card_parallels') {
+        return {
+          select: () => Promise.resolve({ data: [], error: null }),
+          upsert: () => ({ select: vi.fn().mockResolvedValue({ data: [], error: null }) }),
+          update: mockUpdate,
+        };
+      }
+      return {
+        select: () => ({ order: mockOrderFn }),
+        upsert: () => ({ select: mockUpsertSelect }),
+        update: mockUpdate,
+      };
+    });
 
     render(<AppShell />);
 
@@ -265,13 +299,22 @@ describe('Integration: Offline mode serves cached data', () => {
     });
 
     // Mock Supabase to fail (simulates network error)
-    mockFrom.mockImplementation(() => ({
-      select: () => ({
-        order: vi.fn().mockResolvedValue({ data: null, error: { message: 'Network error' } }),
-      }),
-      upsert: mockUpsert,
-      update: mockUpdate,
-    }));
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'card_parallels') {
+        return {
+          select: () => Promise.resolve({ data: null, error: { message: 'Network error' } }),
+          upsert: mockUpsert,
+          update: mockUpdate,
+        };
+      }
+      return {
+        select: () => ({
+          order: vi.fn().mockResolvedValue({ data: null, error: { message: 'Network error' } }),
+        }),
+        upsert: mockUpsert,
+        update: mockUpdate,
+      };
+    });
 
     render(<AppShell />);
 

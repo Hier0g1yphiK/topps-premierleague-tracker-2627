@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import { createToggleState, persistToggle, revertToggle } from './toggle-collected'
 import type { Card } from '../types'

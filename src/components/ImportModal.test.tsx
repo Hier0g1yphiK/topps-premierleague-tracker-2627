@@ -99,11 +99,11 @@ describe('ImportModal', () => {
 
     await waitFor(() => {
       expect(screen.getByText('2')).toBeInTheDocument(); // inserted
-      expect(screen.getByText('Inserted')).toBeInTheDocument();
-      expect(screen.getByText('0')).toBeInTheDocument(); // skipped
+      expect(screen.getByText('Cards Inserted')).toBeInTheDocument();
       expect(screen.getByText('Skipped')).toBeInTheDocument();
       expect(screen.getByText('1')).toBeInTheDocument(); // rejected
       expect(screen.getByText('Rejected')).toBeInTheDocument();
+      expect(screen.getByText('Parallels Created')).toBeInTheDocument();
     });
   });
 

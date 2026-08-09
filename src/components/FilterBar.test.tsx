@@ -140,4 +140,56 @@ describe('FilterBar', () => {
       setName: null,
     });
   });
+
+  it('renders parallel status dropdown', () => {
+    const onFilterChange = vi.fn();
+    render(
+      <FilterBar setNames={setNames} filters={defaultFilters} onFilterChange={onFilterChange} />
+    );
+
+    expect(screen.getByLabelText('Filter by parallel status')).toBeInTheDocument();
+  });
+
+  it('renders parallel status options', () => {
+    const onFilterChange = vi.fn();
+    render(
+      <FilterBar setNames={setNames} filters={defaultFilters} onFilterChange={onFilterChange} />
+    );
+
+    const parallelSelect = screen.getByLabelText('Filter by parallel status') as HTMLSelectElement;
+    const options = Array.from(parallelSelect.options).map((o) => o.text);
+    expect(options).toEqual(['All', 'Has uncollected parallels', 'All parallels collected']);
+  });
+
+  it('calls onFilterChange when parallel status changes', () => {
+    const onFilterChange = vi.fn();
+    render(
+      <FilterBar setNames={setNames} filters={defaultFilters} onFilterChange={onFilterChange} />
+    );
+
+    fireEvent.change(screen.getByLabelText('Filter by parallel status'), {
+      target: { value: 'has_uncollected' },
+    });
+
+    expect(onFilterChange).toHaveBeenCalledWith({
+      ...defaultFilters,
+      parallelStatus: 'has_uncollected',
+    });
+  });
+
+  it('calls onFilterChange with all_collected when selected', () => {
+    const onFilterChange = vi.fn();
+    render(
+      <FilterBar setNames={setNames} filters={defaultFilters} onFilterChange={onFilterChange} />
+    );
+
+    fireEvent.change(screen.getByLabelText('Filter by parallel status'), {
+      target: { value: 'all_collected' },
+    });
+
+    expect(onFilterChange).toHaveBeenCalledWith({
+      ...defaultFilters,
+      parallelStatus: 'all_collected',
+    });
+  });
 });

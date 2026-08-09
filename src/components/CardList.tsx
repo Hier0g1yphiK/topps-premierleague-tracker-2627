@@ -1,4 +1,4 @@
-import type { Card, SortConfig, SortColumn } from '../types';
+import type { Card, CardParallel, SortConfig, SortColumn } from '../types';
 import { CardRowDesktop, CardRowMobile } from './CardRow';
 
 export interface CardListProps {
@@ -9,6 +9,9 @@ export interface CardListProps {
   isLoading: boolean;
   togglingIds: Set<string>;
   hasActiveFilters?: boolean;
+  parallelsMap: Map<string, CardParallel[]>;
+  onToggleParallel: (parallel: CardParallel) => void;
+  togglingParallelIds: Set<string>;
 }
 
 const COLUMNS: { key: SortColumn; label: string }[] = [
@@ -39,6 +42,9 @@ export function CardList({
   isLoading,
   togglingIds,
   hasActiveFilters = false,
+  parallelsMap,
+  onToggleParallel,
+  togglingParallelIds,
 }: CardListProps) {
   // Loading state
   if (isLoading) {
@@ -69,6 +75,8 @@ export function CardList({
       <table className="hidden md:table w-full border-collapse">
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            {/* Expand/collapse column header */}
+            <th className="px-2 py-3 w-12" aria-label="Expand" />
             {COLUMNS.map((col) => (
               <th
                 key={col.key}
@@ -89,6 +97,10 @@ export function CardList({
                 </span>
               </th>
             ))}
+            {/* Parallels count column header */}
+            <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+              Parallels
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -98,6 +110,9 @@ export function CardList({
               card={card}
               onToggleCollected={onToggleCollected}
               isToggling={togglingIds.has(card.id)}
+              parallels={parallelsMap.get(card.id) ?? []}
+              onToggleParallel={onToggleParallel}
+              togglingParallelIds={togglingParallelIds}
             />
           ))}
         </tbody>
@@ -111,6 +126,9 @@ export function CardList({
             card={card}
             onToggleCollected={onToggleCollected}
             isToggling={togglingIds.has(card.id)}
+            parallels={parallelsMap.get(card.id) ?? []}
+            onToggleParallel={onToggleParallel}
+            togglingParallelIds={togglingParallelIds}
           />
         ))}
       </div>

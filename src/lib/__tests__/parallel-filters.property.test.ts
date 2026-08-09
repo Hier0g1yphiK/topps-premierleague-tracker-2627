@@ -88,7 +88,6 @@ describe('Feature: parallel-tracking, Property 13: Has uncollected parallels', (
     fc.assert(
       fc.property(cardsWithParallelsArb, ([cards, parallelsMap]) => {
         const result = filterByParallelStatus(cards, parallelsMap, 'has_uncollected');
-        const resultIds = new Set(result.map((c) => c.id));
 
         for (const card of result) {
           const parallels = parallelsMap.get(card.id);

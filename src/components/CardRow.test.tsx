@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CardRowDesktop, CardRowMobile } from './CardRow';
-import type { Card } from '../types';
+import type { Card, CardParallel } from '../types';
 
 function makeCard(overrides: Partial<Card> = {}): Card {
   return {
@@ -20,87 +20,120 @@ function makeCard(overrides: Partial<Card> = {}): Card {
   };
 }
 
+function makeParallel(overrides: Partial<CardParallel> = {}): CardParallel {
+  return {
+    id: 'parallel-1',
+    card_id: 'card-1',
+    parallel_name: 'Base',
+    collected: false,
+    date_collected: null,
+    created_at: '2025-01-01T00:00:00Z',
+    ...overrides,
+  };
+}
+
+const defaultProps = () => ({
+  card: makeCard(),
+  onToggleCollected: vi.fn(),
+  isToggling: false,
+  parallels: [
+    makeParallel({ id: 'p-1', parallel_name: 'Base', collected: true }),
+    makeParallel({ id: 'p-2', parallel_name: 'Blue Voltage', collected: false }),
+    makeParallel({ id: 'p-3', parallel_name: 'Gold /50', collected: false }),
+  ],
+  onToggleParallel: vi.fn(),
+  togglingParallelIds: new Set<string>(),
+});
+
 describe('CardRowMobile', () => {
-  it('renders card data for an uncollected card', () => {
-    const card = makeCard();
-    render(<CardRowMobile card={card} onToggleCollected={vi.fn()} isToggling={false} />);
+  it('renders card data', () => {
+    const props = defaultProps();
+    render(<CardRowMobile {...props} />);
 
     expect(screen.getByText(/Bukayo Saka/)).toBeInTheDocument();
     expect(screen.getByText('Arsenal')).toBeInTheDocument();
     expect(screen.getByText(/Premium/)).toBeInTheDocument();
   });
 
-  it('shows green background for collected cards', () => {
-    const card = makeCard({ collected: true });
-    const { container } = render(
-      <CardRowMobile card={card} onToggleCollected={vi.fn()} isToggling={false} />
+  it('shows parallel count indicator (e.g., "Parallels: 1/3")', () => {
+    const props = defaultProps();
+    render(<CardRowMobile {...props} />);
+
+    expect(screen.getByText('Parallels: 1/3')).toBeInTheDocument();
+  });
+
+  it('shows expand button with correct aria-label', () => {
+    const props = defaultProps();
+    render(<CardRowMobile {...props} />);
+
+    const expandBtn = screen.getByRole('button', { name: 'Expand parallels' });
+    expect(expandBtn).toBeInTheDocument();
+    expect(expandBtn).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('clicking expand shows ParallelPanel and updates aria', () => {
+    const props = defaultProps();
+    render(<CardRowMobile {...props} />);
+
+    const expandBtn = screen.getByRole('button', { name: 'Expand parallels' });
+    fireEvent.click(expandBtn);
+
+    // After expand, button label changes
+    const collapseBtn = screen.getByRole('button', { name: 'Collapse parallels' });
+    expect(collapseBtn).toHaveAttribute('aria-expanded', 'true');
+
+    // ParallelPanel renders with region role
+    expect(screen.getByRole('region', { name: 'Parallel variants' })).toBeInTheDocument();
+  });
+
+  it('card-level toggle delegates to Base parallel when one exists', () => {
+    const props = defaultProps();
+    render(<CardRowMobile {...props} />);
+
+    const toggleBtn = screen.getByRole('button', { name: /mark as collected/i });
+    fireEvent.click(toggleBtn);
+
+    // Should call onToggleParallel with the Base parallel, not onToggleCollected
+    expect(props.onToggleParallel).toHaveBeenCalledWith(
+      expect.objectContaining({ parallel_name: 'Base' })
     );
-
-    const mobileCard = container.firstElementChild;
-    expect(mobileCard).toHaveClass('bg-green-50');
+    expect(props.onToggleCollected).not.toHaveBeenCalled();
   });
 
-  it('shows white/default background for uncollected cards', () => {
-    const card = makeCard({ collected: false });
-    const { container } = render(
-      <CardRowMobile card={card} onToggleCollected={vi.fn()} isToggling={false} />
-    );
+  it('card-level toggle calls onToggleCollected when no Base parallel exists', () => {
+    const props = defaultProps();
+    props.parallels = [
+      makeParallel({ id: 'p-2', parallel_name: 'Blue Voltage', collected: false }),
+      makeParallel({ id: 'p-3', parallel_name: 'Gold /50', collected: true }),
+    ];
+    render(<CardRowMobile {...props} />);
 
-    const mobileCard = container.firstElementChild;
-    expect(mobileCard).toHaveClass('bg-white');
+    const toggleBtn = screen.getByRole('button', { name: /mark as collected/i });
+    fireEvent.click(toggleBtn);
+
+    expect(props.onToggleCollected).toHaveBeenCalledWith(props.card);
+    expect(props.onToggleParallel).not.toHaveBeenCalled();
   });
 
-  it('calls onToggleCollected when button is clicked', () => {
-    const card = makeCard();
-    const onToggle = vi.fn();
-    render(<CardRowMobile card={card} onToggleCollected={onToggle} isToggling={false} />);
+  it('does not toggle when isToggling is true', () => {
+    const props = defaultProps();
+    props.isToggling = true;
+    render(<CardRowMobile {...props} />);
 
-    const button = screen.getByRole('button', { name: /mark as collected/i });
-    fireEvent.click(button);
-    expect(onToggle).toHaveBeenCalledWith(card);
-  });
+    const toggleBtn = screen.getByRole('button', { name: /mark as collected/i });
+    fireEvent.click(toggleBtn);
 
-  it('does not call onToggleCollected when isToggling is true', () => {
-    const card = makeCard();
-    const onToggle = vi.fn();
-    render(<CardRowMobile card={card} onToggleCollected={onToggle} isToggling={true} />);
-
-    const button = screen.getByRole('button', { name: /mark as collected/i });
-    fireEvent.click(button);
-    expect(onToggle).not.toHaveBeenCalled();
+    expect(props.onToggleParallel).not.toHaveBeenCalled();
+    expect(props.onToggleCollected).not.toHaveBeenCalled();
   });
 
   it('shows reduced opacity when isToggling', () => {
-    const card = makeCard();
-    const { container } = render(
-      <CardRowMobile card={card} onToggleCollected={vi.fn()} isToggling={true} />
-    );
+    const props = defaultProps();
+    props.isToggling = true;
+    const { container } = render(<CardRowMobile {...props} />);
 
     const mobileCard = container.firstElementChild;
     expect(mobileCard).toHaveClass('opacity-50');
-  });
-
-  it('has accessible aria-label for toggle action', () => {
-    const uncollected = makeCard({ collected: false });
-    const { rerender } = render(
-      <CardRowMobile card={uncollected} onToggleCollected={vi.fn()} isToggling={false} />
-    );
-
-    expect(screen.getByRole('button', { name: 'Mark as collected' })).toBeInTheDocument();
-
-    const collected = makeCard({ collected: true });
-    rerender(<CardRowMobile card={collected} onToggleCollected={vi.fn()} isToggling={false} />);
-
-    expect(screen.getByRole('button', { name: 'Mark as uncollected' })).toBeInTheDocument();
-  });
-
-  it('ensures tap target is at least 44x44px', () => {
-    const card = makeCard();
-    render(<CardRowMobile card={card} onToggleCollected={vi.fn()} isToggling={false} />);
-
-    const button = screen.getByRole('button', { name: /mark as collected/i });
-    expect(button).toHaveClass('min-w-[44px]');
-    expect(button).toHaveClass('min-h-[44px]');
   });
 });
 
@@ -114,8 +147,8 @@ describe('CardRowDesktop', () => {
   }
 
   it('renders card data in table cells', () => {
-    const card = makeCard();
-    renderInTable(<CardRowDesktop card={card} onToggleCollected={vi.fn()} isToggling={false} />);
+    const props = defaultProps();
+    renderInTable(<CardRowDesktop {...props} />);
 
     expect(screen.getByText('42')).toBeInTheDocument();
     expect(screen.getByText('Premium')).toBeInTheDocument();
@@ -124,64 +157,91 @@ describe('CardRowDesktop', () => {
     expect(screen.getByText('Arsenal')).toBeInTheDocument();
   });
 
-  it('shows green background for collected cards', () => {
-    const card = makeCard({ collected: true });
-    renderInTable(<CardRowDesktop card={card} onToggleCollected={vi.fn()} isToggling={false} />);
+  it('shows parallel count (e.g., "1/3")', () => {
+    const props = defaultProps();
+    renderInTable(<CardRowDesktop {...props} />);
 
-    const row = screen.getByRole('button');
-    expect(row).toHaveClass('bg-green-50');
+    expect(screen.getByText('1/3')).toBeInTheDocument();
   });
 
-  it('shows default background for uncollected cards', () => {
-    const card = makeCard({ collected: false });
-    renderInTable(<CardRowDesktop card={card} onToggleCollected={vi.fn()} isToggling={false} />);
+  it('shows expand button with correct aria-label', () => {
+    const props = defaultProps();
+    renderInTable(<CardRowDesktop {...props} />);
 
-    const row = screen.getByRole('button');
-    expect(row).toHaveClass('bg-white');
+    const expandBtn = screen.getByRole('button', { name: 'Expand parallels' });
+    expect(expandBtn).toBeInTheDocument();
+    expect(expandBtn).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('calls onToggleCollected when row is clicked', () => {
-    const card = makeCard();
-    const onToggle = vi.fn();
-    renderInTable(<CardRowDesktop card={card} onToggleCollected={onToggle} isToggling={false} />);
+  it('clicking expand button shows parallel panel', () => {
+    const props = defaultProps();
+    renderInTable(<CardRowDesktop {...props} />);
 
-    const row = screen.getByRole('button');
-    fireEvent.click(row);
-    expect(onToggle).toHaveBeenCalledWith(card);
+    const expandBtn = screen.getByRole('button', { name: 'Expand parallels' });
+    fireEvent.click(expandBtn);
+
+    const collapseBtn = screen.getByRole('button', { name: 'Collapse parallels' });
+    expect(collapseBtn).toHaveAttribute('aria-expanded', 'true');
+
+    expect(screen.getByRole('region', { name: 'Parallel variants' })).toBeInTheDocument();
   });
 
-  it('does not call onToggleCollected when isToggling is true', () => {
-    const card = makeCard();
-    const onToggle = vi.fn();
-    renderInTable(<CardRowDesktop card={card} onToggleCollected={onToggle} isToggling={true} />);
+  it('card-level toggle delegates to Base parallel', () => {
+    const props = defaultProps();
+    renderInTable(<CardRowDesktop {...props} />);
 
-    const row = screen.getByRole('button');
-    fireEvent.click(row);
-    expect(onToggle).not.toHaveBeenCalled();
+    const toggleBtn = screen.getByRole('button', { name: /mark as collected/i });
+    fireEvent.click(toggleBtn);
+
+    expect(props.onToggleParallel).toHaveBeenCalledWith(
+      expect.objectContaining({ parallel_name: 'Base' })
+    );
+    expect(props.onToggleCollected).not.toHaveBeenCalled();
   });
 
-  it('shows reduced opacity when isToggling', () => {
-    const card = makeCard();
-    renderInTable(<CardRowDesktop card={card} onToggleCollected={vi.fn()} isToggling={true} />);
+  it('card-level toggle falls back to onToggleCollected without Base parallel', () => {
+    const props = defaultProps();
+    props.parallels = [
+      makeParallel({ id: 'p-2', parallel_name: 'Blue Voltage', collected: false }),
+    ];
+    renderInTable(<CardRowDesktop {...props} />);
 
-    const row = screen.getByRole('button');
-    expect(row).toHaveClass('opacity-50');
+    const toggleBtn = screen.getByRole('button', { name: /mark as collected/i });
+    fireEvent.click(toggleBtn);
+
+    expect(props.onToggleCollected).toHaveBeenCalledWith(props.card);
+    expect(props.onToggleParallel).not.toHaveBeenCalled();
   });
 
-  it('has accessible aria-label for toggle action', () => {
-    const card = makeCard({ collected: false });
-    renderInTable(<CardRowDesktop card={card} onToggleCollected={vi.fn()} isToggling={false} />);
+  it('has keyboard accessible expand (Enter key on button)', () => {
+    const props = defaultProps();
+    renderInTable(<CardRowDesktop {...props} />);
 
-    expect(screen.getByRole('button', { name: 'Mark as collected' })).toBeInTheDocument();
+    const expandBtn = screen.getByRole('button', { name: 'Expand parallels' });
+    fireEvent.keyDown(expandBtn, { key: 'Enter' });
+
+    expect(screen.getByRole('button', { name: 'Collapse parallels' })).toBeInTheDocument();
   });
 
-  it('responds to keyboard Enter to toggle', () => {
-    const card = makeCard();
-    const onToggle = vi.fn();
-    renderInTable(<CardRowDesktop card={card} onToggleCollected={onToggle} isToggling={false} />);
+  it('has keyboard accessible expand (Space key on button)', () => {
+    const props = defaultProps();
+    renderInTable(<CardRowDesktop {...props} />);
 
-    const row = screen.getByRole('button');
-    fireEvent.keyDown(row, { key: 'Enter' });
-    expect(onToggle).toHaveBeenCalledWith(card);
+    const expandBtn = screen.getByRole('button', { name: 'Expand parallels' });
+    fireEvent.keyDown(expandBtn, { key: ' ' });
+
+    expect(screen.getByRole('button', { name: 'Collapse parallels' })).toBeInTheDocument();
+  });
+
+  it('does not toggle when isToggling is true', () => {
+    const props = defaultProps();
+    props.isToggling = true;
+    renderInTable(<CardRowDesktop {...props} />);
+
+    const toggleBtn = screen.getByRole('button', { name: /mark as collected/i });
+    fireEvent.click(toggleBtn);
+
+    expect(props.onToggleParallel).not.toHaveBeenCalled();
+    expect(props.onToggleCollected).not.toHaveBeenCalled();
   });
 });
