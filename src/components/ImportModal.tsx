@@ -94,6 +94,7 @@ export function ImportModal({ isOpen, onClose, onImportComplete }: ImportModalPr
 
       const importSummary: ImportSummary = {
         inserted,
+        parallelsCreated: 0,
         skipped,
         rejected,
         errors,
@@ -107,6 +108,7 @@ export function ImportModal({ isOpen, onClose, onImportComplete }: ImportModalPr
       console.error('Import error:', err);
       const errorSummary: ImportSummary = {
         inserted: 0,
+        parallelsCreated: 0,
         skipped: 0,
         rejected: 0,
         errors: [{ row: 0, reason: message || 'An unexpected error occurred during import' }],

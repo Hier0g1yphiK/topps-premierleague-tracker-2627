@@ -12,10 +12,22 @@ export interface Card {
   created_at: string;      // ISO timestamp
 }
 
+export interface CardParallel {
+  id: string;              // UUID
+  card_id: string;         // FK to Card.id
+  parallel_name: string;   // e.g., "Base", "Blue Voltage", "Gold /50"
+  collected: boolean;
+  date_collected: string | null;  // ISO date string
+  created_at: string;      // ISO timestamp
+}
+
+export type ParallelFilterStatus = 'all' | 'has_uncollected' | 'all_collected';
+
 export interface FilterState {
   searchText: string;      // Max 100 chars
   setName: string | null;  // null = "All Sets"
   collectedStatus: 'all' | 'collected' | 'missing';
+  parallelStatus: ParallelFilterStatus;
 }
 
 export interface SortConfig {
@@ -27,6 +39,7 @@ export type SortColumn = 'card_number' | 'set_name' | 'set_card_number' | 'playe
 
 export interface ImportSummary {
   inserted: number;
+  parallelsCreated: number;
   skipped: number;
   rejected: number;
   errors: ImportError[];

@@ -21,6 +21,7 @@ const DEFAULT_FILTERS: FilterState = {
   searchText: '',
   setName: null,
   collectedStatus: 'all',
+  parallelStatus: 'all',
 };
 
 const DEFAULT_SORT_CONFIG: SortConfig = {

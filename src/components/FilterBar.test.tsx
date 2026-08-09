@@ -7,6 +7,7 @@ describe('FilterBar', () => {
     searchText: '',
     setName: null,
     collectedStatus: 'all',
+    parallelStatus: 'all',
   };
 
   const setNames = ['Base', 'Crystal', 'Foil'];

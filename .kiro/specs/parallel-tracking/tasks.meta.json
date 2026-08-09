@@ -1,0 +1,678 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Add new TypeScript types to `src/types/index.ts`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491242
+      },
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235499760
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306233
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236315481
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522584
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301545980
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301598714
+      }
+    ],
+    "1.2 Create SQL migration file for `card_parallels` table": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491286
+      },
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235500577
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306266
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236316256
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522633
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301547679
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301599536
+      }
+    ],
+    "2.1 Create `src/lib/parallel-sort.ts`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491307
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306290
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522663
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301603670
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301879503
+      }
+    ],
+    "2.2 Write property test for parallel sort ordering": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491329
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306323
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522687
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301886646
+      }
+    ],
+    "2.3 Create `src/lib/parallel-toggle.ts`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491352
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306356
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522711
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301604469
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301880230
+      }
+    ],
+    "2.4 Write property test for parallel toggle state transition": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491372
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306381
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522735
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301887450
+      }
+    ],
+    "2.5 Create `src/lib/parallel-filters.ts`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491406
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306406
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522775
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301605275
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301881084
+      }
+    ],
+    "2.6 Write property tests for parallel filters": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491426
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306432
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522798
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301888297
+      }
+    ],
+    "2.7 Add card-level status derivation utility": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491445
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306454
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522820
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301606067
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301882034
+      }
+    ],
+    "2.8 Write property test for card-level status derivation": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491468
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306477
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522849
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301888961
+      }
+    ],
+    "3. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491490
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306500
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522882
+      }
+    ],
+    "4.1 Add parallel stats functions to `src/lib/stats.ts`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491510
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306523
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522903
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301889829
+      }
+    ],
+    "4.2 Write property tests for parallel statistics": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491534
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306542
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522932
+      }
+    ],
+    "5.1 Update `src/lib/csv-import.ts` to support parallel column": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491555
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306574
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522953
+      }
+    ],
+    "5.2 Write property tests for CSV import with parallels": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491577
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306600
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301522977
+      }
+    ],
+    "6.1 Update `src/lib/offline-cache.ts` for version 2 schema": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491601
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306622
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523004
+      }
+    ],
+    "6.2 Write integration test for offline cache upgrade": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491623
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306642
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523031
+      }
+    ],
+    "7. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491644
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306667
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523053
+      }
+    ],
+    "8.1 Create `src/hooks/useToggleParallel.ts`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491668
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306689
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523077
+      }
+    ],
+    "8.2 Update `src/hooks/useRealtimeSubscription.ts` for parallel events": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491690
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306708
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523099
+      }
+    ],
+    "8.3 Write unit tests for useToggleParallel hook": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491709
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306728
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523127
+      }
+    ],
+    "9.1 Create `src/components/ParallelItem.tsx`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491728
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306750
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523154
+      }
+    ],
+    "9.2 Create `src/components/ParallelPanel.tsx`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491751
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306772
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523178
+      }
+    ],
+    "9.3 Write unit tests for ParallelPanel and ParallelItem": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491773
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306792
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523215
+      }
+    ],
+    "10.1 Update `src/components/CardRow.tsx` (both Desktop and Mobile variants)": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491793
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306817
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523244
+      }
+    ],
+    "10.2 Update unit tests for CardRow": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491812
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306851
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523267
+      }
+    ],
+    "11.1 Update `src/components/FilterBar.tsx`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491835
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306873
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523291
+      }
+    ],
+    "11.2 Write unit test for FilterBar parallel status dropdown": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491856
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306892
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523315
+      }
+    ],
+    "12.1 Update `src/components/StatsBar.tsx`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491877
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306917
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523337
+      }
+    ],
+    "12.2 Write unit test for StatsBar parallel metrics": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491898
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306938
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523363
+      }
+    ],
+    "13.1 Integrate parallel data loading and state management in `src/components/AppShell.tsx`": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491918
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306959
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523386
+      }
+    ],
+    "13.2 Update `src/components/ImportModal.tsx` for parallel-aware import": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491943
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236306982
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523414
+      }
+    ],
+    "14. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "13003b1e-07ef-4cc2-b0a3-1e7f2b202708",
+        "chatSessionId": "sess_bb892b9a-345f-4b5e-acf6-6201afa759ff",
+        "timestamp": 1786235491975
+      },
+      {
+        "executionId": "2e542ce4-e07f-455d-96e4-5479a583909c",
+        "chatSessionId": "sess_fb92eff0-3696-45ed-b710-fe3d0df572ef",
+        "timestamp": 1786236307005
+      },
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301523448
+      }
+    ],
+    "1. Define types and database schema": [
+      {
+        "executionId": "057bbaec-7b64-432f-9e21-fdf667e9700c",
+        "chatSessionId": "sess_fc4202b4-fc6d-44ec-8820-83e759408cde",
+        "timestamp": 1786301599585
+      }
+    ]
+  }
+}

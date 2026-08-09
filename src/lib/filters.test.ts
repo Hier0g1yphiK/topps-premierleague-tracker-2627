@@ -126,32 +126,32 @@ describe('applyFilters', () => {
   ];
 
   it('returns original array when all filters are at defaults', () => {
-    const filters: FilterState = { searchText: '', setName: null, collectedStatus: 'all' };
+    const filters: FilterState = { searchText: '', setName: null, collectedStatus: 'all', parallelStatus: 'all' };
     expect(applyFilters(cards, filters)).toBe(cards);
   });
 
   it('applies search filter alone', () => {
-    const filters: FilterState = { searchText: 'Salah', setName: null, collectedStatus: 'all' };
+    const filters: FilterState = { searchText: 'Salah', setName: null, collectedStatus: 'all', parallelStatus: 'all' };
     const result = applyFilters(cards, filters);
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('2');
   });
 
   it('applies set name filter alone', () => {
-    const filters: FilterState = { searchText: '', setName: 'Base', collectedStatus: 'all' };
+    const filters: FilterState = { searchText: '', setName: 'Base', collectedStatus: 'all', parallelStatus: 'all' };
     const result = applyFilters(cards, filters);
     expect(result).toHaveLength(2);
   });
 
   it('applies collected status filter alone', () => {
-    const filters: FilterState = { searchText: '', setName: null, collectedStatus: 'missing' };
+    const filters: FilterState = { searchText: '', setName: null, collectedStatus: 'missing', parallelStatus: 'all' };
     const result = applyFilters(cards, filters);
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('2');
   });
 
   it('composes all filters with AND logic', () => {
-    const filters: FilterState = { searchText: 'a', setName: 'Base', collectedStatus: 'collected' };
+    const filters: FilterState = { searchText: 'a', setName: 'Base', collectedStatus: 'collected', parallelStatus: 'all' };
     const result = applyFilters(cards, filters);
     // 'a' matches Haaland (player) + Manchester (team) and Saka (player) + Arsenal (team)
     // set_name 'Base' matches id 1, 3

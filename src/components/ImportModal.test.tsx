@@ -146,6 +146,7 @@ describe('ImportModal', () => {
     await waitFor(() => {
       expect(defaultProps.onImportComplete).toHaveBeenCalledWith({
         inserted: 1,
+        parallelsCreated: 0,
         skipped: 0,
         rejected: 0,
         errors: [],

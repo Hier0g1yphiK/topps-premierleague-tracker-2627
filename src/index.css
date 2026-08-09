@@ -1,3 +1,19 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* iOS PWA: fill the area behind the notch/status bar with the header colour */
+html {
+  background-color: #7c3aed;
+}
+
+html:where(.dark) {
+  background-color: #1f2937;
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}

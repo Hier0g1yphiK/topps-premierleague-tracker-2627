@@ -41,6 +41,7 @@ const filterStateArb: fc.Arbitrary<FilterState> = fc.record({
     fc.string({ minLength: 1, maxLength: 30 })
   ),
   collectedStatus: fc.constantFrom('all' as const, 'collected' as const, 'missing' as const),
+  parallelStatus: fc.constantFrom('all' as const, 'has_uncollected' as const, 'all_collected' as const),
 });
 
 // --- Helper: check if a single card satisfies all active filter criteria ---
@@ -125,6 +126,7 @@ describe('Feature: premier-league-tracker, Property 4: Composite filter AND logi
           searchText: '',
           setName: null,
           collectedStatus: 'all',
+          parallelStatus: 'all',
         };
         const result = applyFilters(cards, defaultFilters);
 
