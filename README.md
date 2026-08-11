@@ -1,13 +1,14 @@
 # Topps Premier League Tracker 26/27
 
-A Progressive Web App for tracking your Topps Premier League 2026-27 sticker/card collection. Mark cards as collected, filter and sort your checklist, import data from CSV, and sync across devices in real time.
+A Progressive Web App for tracking your Topps Premier League 2026-27 sticker/card collection. Mark cards as collected, track parallel variants, filter and sort your checklist, import data from CSV, and sync across devices in real time.
 
 ## Features
 
 - **Collection tracking** — Toggle cards as collected/uncollected with optimistic UI
-- **Filtering & search** — Filter by player/team name, set, or collected status
+- **Parallel tracking** — Track named parallel variants (Blue Voltage, Gold /50, etc.) independently from the base card
+- **Filtering & search** — Filter by player/team name, set, collected status, or parallel completion
 - **Sorting** — Sort by card number, set, player, team, or collected status
-- **CSV import** — Bulk-import card data from a CSV file
+- **CSV import** — Bulk-import card data and parallels from a CSV file (batched for large datasets)
 - **Real-time sync** — Live updates across devices via Supabase Realtime
 - **Offline-first** — Works without network using service worker caching and IndexedDB
 - **Dark mode** — System-aware with manual toggle
@@ -26,7 +27,7 @@ A Progressive Web App for tracking your Topps Premier League 2026-27 sticker/car
 ### Prerequisites
 
 - Node.js 18+
-- A Supabase project with the `cards` table set up
+- A Supabase project with `cards` and `card_parallels` tables set up
 
 ### Setup
 
@@ -70,6 +71,25 @@ npm run test:watch # Run tests in watch mode
 npm run lint
 ```
 
+## Data Model
+
+- **`cards`** — One row per unique card. `cards.collected` tracks whether you have the base version.
+- **`card_parallels`** — One row per named parallel variant (e.g. "Blue Voltage", "Gold /50"). Only actual parallels are stored here — "Base" is NOT a parallel, it's represented by the card row itself.
+
+### CSV Format
+
+The import CSV should have columns: `card_number`, `set` (or `set_name`), `set_card_number`, `player`, `team`, `notes` (optional), `parallel` (optional).
+
+- Rows where `parallel` is empty or "Base" create/update the card only (no parallel record).
+- Rows with a named parallel value (e.g. "Blue Voltage") create a `card_parallels` record.
+
+## Scripts
+
+```bash
+node scripts/migrate-base-parallels.mjs   # One-time migration to remove legacy "Base" parallel rows
+node scripts/generate-icons.mjs           # Generate PWA icons from SVG source
+```
+
 ## Project Structure
 
 ```
@@ -78,7 +98,9 @@ src/
 ├── hooks/         # Custom React hooks
 ├── lib/           # Pure logic & utilities (no React)
 ├── types/         # Shared TypeScript interfaces
+├── resources/     # Reference CSV data
 └── test/          # Test setup
+scripts/           # Utility and migration scripts
 ```
 
 See `.kiro/steering/structure.md` for a detailed breakdown.

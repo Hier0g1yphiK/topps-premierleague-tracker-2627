@@ -36,6 +36,13 @@ npm run test:watch # Run tests in watch mode
 npm run preview    # Preview production build locally
 ```
 
+## Scripts
+
+```bash
+node scripts/migrate-base-parallels.mjs  # Remove legacy "Base" parallel rows from DB
+node scripts/generate-icons.mjs          # Generate PWA icons from SVG
+```
+
 ## Environment Variables
 
 Stored in `.env` (gitignored). Required:
@@ -49,3 +56,5 @@ Stored in `.env` (gitignored). Required:
 - Dark mode via `dark:` Tailwind variants; toggled by a `useDarkMode` hook
 - All interactive elements must meet 44x44px minimum tap target
 - Accessibility: use aria-labels, semantic HTML, keyboard navigation
+- **Base card vs. parallels**: `cards.collected` is the single source of truth for base-card status. Only named variants (not "Base") go into `card_parallels`. CSV rows with empty or "Base" parallel column do NOT create a parallel record.
+- **Supabase pagination**: all fetches use `.range()` pagination (page size 1000) to handle datasets exceeding Supabase's default row limit. All inserts/upserts batch in groups of 500.
