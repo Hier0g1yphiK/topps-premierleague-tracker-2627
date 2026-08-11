@@ -40,6 +40,7 @@ src/
 │   └── parallel-toggle.ts   # Parallel toggle persistence logic
 ├── lib/__tests__/           # Property-based tests (fast-check)
 ├── resources/
+│   ├── appicon.png          # Source app icon (used to generate PWA icons)
 │   └── Topps_Premier_League_26_27_Checklist_with_Parallels.csv  # Reference CSV
 ├── types/
 │   └── index.ts             # Shared TypeScript interfaces (Card, CardParallel, FilterState, etc.)
@@ -52,6 +53,7 @@ scripts/
 
 public/
 ├── manifest.json            # PWA manifest
+├── apple-touch-icon.png     # 180x180 icon for iOS "Add to Home Screen"
 ├── icons/                   # PWA icons (192x192, 512x512)
 └── favicon.svg
 ```

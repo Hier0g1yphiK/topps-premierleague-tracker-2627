@@ -87,7 +87,7 @@ The import CSV should have columns: `card_number`, `set` (or `set_name`), `set_c
 
 ```bash
 node scripts/migrate-base-parallels.mjs   # One-time migration to remove legacy "Base" parallel rows
-node scripts/generate-icons.mjs           # Generate PWA icons from SVG source
+node scripts/generate-icons.mjs           # Generate PWA icons from source image (src/resources/appicon.png)
 ```
 
 ## Project Structure
@@ -98,9 +98,14 @@ src/
 ├── hooks/         # Custom React hooks
 ├── lib/           # Pure logic & utilities (no React)
 ├── types/         # Shared TypeScript interfaces
-├── resources/     # Reference CSV data
+├── resources/     # Reference CSV data & source app icon
 └── test/          # Test setup
 scripts/           # Utility and migration scripts
+public/
+├── manifest.json  # PWA manifest
+├── apple-touch-icon.png  # iOS home screen icon
+├── icons/         # PWA icons (192x192, 512x512)
+└── favicon.svg
 ```
 
 See `.kiro/steering/structure.md` for a detailed breakdown.

@@ -40,7 +40,7 @@ npm run preview    # Preview production build locally
 
 ```bash
 node scripts/migrate-base-parallels.mjs  # Remove legacy "Base" parallel rows from DB
-node scripts/generate-icons.mjs          # Generate PWA icons from SVG
+node scripts/generate-icons.mjs          # Generate PWA icons from source image
 ```
 
 ## Environment Variables
