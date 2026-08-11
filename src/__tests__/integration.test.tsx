@@ -147,7 +147,19 @@ describe('Integration: CSV import → cards appear in list', () => {
         };
       }
       return {
-        select: () => ({ order: mockOrderFn }),
+        select: () => ({
+          order: mockOrderFn,
+          in: () => Promise.resolve({ data: [], error: null }),
+        }),
+        insert: () => ({
+          select: () => Promise.resolve({
+            data: [
+              { id: 'id-1', card_number: 1 },
+              { id: 'id-2', card_number: 2 },
+            ],
+            error: null,
+          }),
+        }),
         upsert: () => ({ select: mockUpsertSelect }),
         update: mockUpdate,
       };
@@ -209,7 +221,7 @@ describe('Integration: Toggle collected → stats update', () => {
     expect(screen.getByText('1 / 3 collected')).toBeInTheDocument();
 
     // Click on the first uncollected card row to toggle it
-    const markAsCollectedButtons = screen.getAllByLabelText('Mark as collected');
+    const markAsCollectedButtons = screen.getAllByLabelText('Mark base as collected');
     await act(async () => {
       fireEvent.click(markAsCollectedButtons[0]);
     });

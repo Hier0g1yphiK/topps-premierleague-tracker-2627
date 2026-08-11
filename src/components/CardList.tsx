@@ -20,7 +20,7 @@ const COLUMNS: { key: SortColumn; label: string }[] = [
   { key: 'set_card_number', label: 'Set #' },
   { key: 'player', label: 'Player' },
   { key: 'team', label: 'Team' },
-  { key: 'collected', label: 'Status' },
+  { key: 'collected', label: 'Base' },
 ];
 
 function SortIndicator({ column, sortConfig }: { column: SortColumn; sortConfig: SortConfig }) {
@@ -75,8 +75,6 @@ export function CardList({
       <table className="hidden md:table w-full border-collapse">
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-            {/* Expand/collapse column header */}
-            <th className="px-2 py-3 w-12" aria-label="Expand" />
             {COLUMNS.map((col) => (
               <th
                 key={col.key}
@@ -97,7 +95,7 @@ export function CardList({
                 </span>
               </th>
             ))}
-            {/* Parallels count column header */}
+            {/* Parallels column header */}
             <th className="px-3 py-3 text-center text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
               Parallels
             </th>
