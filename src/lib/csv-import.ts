@@ -7,7 +7,7 @@ export interface ParsedRow {
   player: string;
   team: string;
   notes: string | null;
-  parallel_name: string;
+  parallel_name: string | null;
 }
 
 const REQUIRED_HEADERS = ['card_number', 'set_name', 'set_card_number', 'player', 'team'];
@@ -48,11 +48,14 @@ export function parseCSV(fileContent: string): ParsedRow[] {
       row[headers[j]] = values[j]?.trim() ?? '';
     }
 
-    // Determine parallel_name: use column value if present, default to "Base" if missing/empty
-    let parallelName = 'Base';
+    // Determine parallel_name: use column value if present.
+    // "Base" or empty means no parallel — represented by the card itself (cards.collected).
+    let parallelName: string | null = null;
     if (hasParallelColumn) {
       const rawParallel = row['parallel']?.trim() ?? '';
-      parallelName = rawParallel === '' ? 'Base' : rawParallel;
+      if (rawParallel !== '' && rawParallel !== 'Base') {
+        parallelName = rawParallel;
+      }
     }
 
     rows.push({
@@ -155,8 +158,8 @@ export function validateRow(
     };
   }
 
-  // parallel_name: must be non-empty after trim
-  if (!row.parallel_name.trim()) {
+  // parallel_name: if present, must be non-empty after trim
+  if (row.parallel_name !== null && !row.parallel_name.trim()) {
     return {
       valid: false,
       error: { row: rowIndex, reason: 'parallel_name is required' },

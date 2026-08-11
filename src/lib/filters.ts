@@ -29,27 +29,22 @@ export function filterBySetName(cards: Card[], setName: string | null): Card[] {
 
 /**
  * Filters cards by collected status.
- * 'all' returns all cards, 'collected' returns cards with at least one parallel collected,
- * 'missing' returns cards with no parallels collected.
- * Falls back to card.collected if no parallels exist for a card.
+ * 'all' returns all cards, 'collected' returns cards where card.collected is true,
+ * 'missing' returns cards where card.collected is false.
+ * The card.collected field is the single source of truth for base-card collected status.
  */
 export function filterByCollectedStatus(
   cards: Card[],
   status: 'all' | 'collected' | 'missing',
-  parallelsMap?: Map<string, CardParallel[]>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _parallelsMap?: Map<string, CardParallel[]>
 ): Card[] {
   if (status === 'all') {
     return cards;
   }
 
   return cards.filter((card) => {
-    const parallels = parallelsMap?.get(card.id);
-    // Determine collected: any parallel collected, or fall back to card.collected
-    const isCollected = parallels && parallels.length > 0
-      ? parallels.some((p) => p.collected === true)
-      : card.collected === true;
-
-    return status === 'collected' ? isCollected : !isCollected;
+    return status === 'collected' ? card.collected === true : card.collected === false;
   });
 }
 

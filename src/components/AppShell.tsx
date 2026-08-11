@@ -74,17 +74,67 @@ export function AppShell() {
   const fetchCards = useCallback(async () => {
     setIsLoading(true);
 
-    const [cardsResult, parallelsResult] = await Promise.all([
-      supabase.from('cards').select('*').order('card_number'),
-      supabase.from('card_parallels').select('*'),
-    ]);
+    // Fetch all cards (paginated to avoid Supabase default row limit)
+    let allCards: Card[] = [];
+    let cardsError = false;
+    {
+      const PAGE_SIZE = 1000;
+      let from = 0;
+      let hasMore = true;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('cards')
+          .select('*')
+          .order('card_number')
+          .range(from, from + PAGE_SIZE - 1);
 
-    if (!cardsResult.error && cardsResult.data) {
-      setCards(cardsResult.data as Card[]);
-      saveCardsToCache(cardsResult.data as Card[]).catch(() => {
+        if (error) {
+          cardsError = true;
+          break;
+        }
+        if (data) {
+          allCards = allCards.concat(data as Card[]);
+          hasMore = data.length === PAGE_SIZE;
+          from += PAGE_SIZE;
+        } else {
+          hasMore = false;
+        }
+      }
+    }
+
+    // Fetch all parallels (paginated)
+    let allParallels: CardParallel[] = [];
+    let parallelsError = false;
+    {
+      const PAGE_SIZE = 1000;
+      let from = 0;
+      let hasMore = true;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('card_parallels')
+          .select('*')
+          .range(from, from + PAGE_SIZE - 1);
+
+        if (error) {
+          parallelsError = true;
+          break;
+        }
+        if (data) {
+          allParallels = allParallels.concat(data as CardParallel[]);
+          hasMore = data.length === PAGE_SIZE;
+          from += PAGE_SIZE;
+        } else {
+          hasMore = false;
+        }
+      }
+    }
+
+    if (!cardsError && allCards.length > 0) {
+      setCards(allCards);
+      saveCardsToCache(allCards).catch(() => {
         // Silently ignore cache save failures
       });
-    } else {
+    } else if (cardsError) {
       // On fetch failure, try loading from offline cache
       try {
         const cached = await loadCardsFromCache();
@@ -96,12 +146,12 @@ export function AppShell() {
       }
     }
 
-    if (!parallelsResult.error && parallelsResult.data) {
-      setParallels(parallelsResult.data as CardParallel[]);
-      saveParallelsToCache(parallelsResult.data as CardParallel[]).catch(() => {
+    if (!parallelsError && allParallels.length > 0) {
+      setParallels(allParallels);
+      saveParallelsToCache(allParallels).catch(() => {
         // Silently ignore cache save failures
       });
-    } else {
+    } else if (parallelsError) {
       // On fetch failure, try loading from offline cache
       try {
         const cached = await loadParallelsFromCache();
@@ -152,19 +202,55 @@ export function AppShell() {
     onCardUpdate: handleCardUpdate,
     onParallelUpdate: handleParallelUpdate,
     onReconnected: async () => {
-      // Re-fetch cards and parallels to reconcile any missed updates
-      const [cardsRes, parallelsRes] = await Promise.all([
-        supabase.from('cards').select('*').order('card_number'),
-        supabase.from('card_parallels').select('*'),
-      ]);
-
-      if (cardsRes.data) {
-        setCards(cardsRes.data as Card[]);
-        saveCardsToCache(cardsRes.data as Card[]).catch(() => {});
+      // Re-fetch cards and parallels to reconcile any missed updates (paginated)
+      let reconnectedCards: Card[] = [];
+      {
+        const PAGE_SIZE = 1000;
+        let from = 0;
+        let hasMore = true;
+        while (hasMore) {
+          const { data } = await supabase
+            .from('cards')
+            .select('*')
+            .order('card_number')
+            .range(from, from + PAGE_SIZE - 1);
+          if (data && data.length > 0) {
+            reconnectedCards = reconnectedCards.concat(data as Card[]);
+            hasMore = data.length === PAGE_SIZE;
+            from += PAGE_SIZE;
+          } else {
+            hasMore = false;
+          }
+        }
       }
-      if (parallelsRes.data) {
-        setParallels(parallelsRes.data as CardParallel[]);
-        saveParallelsToCache(parallelsRes.data as CardParallel[]).catch(() => {});
+
+      let reconnectedParallels: CardParallel[] = [];
+      {
+        const PAGE_SIZE = 1000;
+        let from = 0;
+        let hasMore = true;
+        while (hasMore) {
+          const { data } = await supabase
+            .from('card_parallels')
+            .select('*')
+            .range(from, from + PAGE_SIZE - 1);
+          if (data && data.length > 0) {
+            reconnectedParallels = reconnectedParallels.concat(data as CardParallel[]);
+            hasMore = data.length === PAGE_SIZE;
+            from += PAGE_SIZE;
+          } else {
+            hasMore = false;
+          }
+        }
+      }
+
+      if (reconnectedCards.length > 0) {
+        setCards(reconnectedCards);
+        saveCardsToCache(reconnectedCards).catch(() => {});
+      }
+      if (reconnectedParallels.length > 0) {
+        setParallels(reconnectedParallels);
+        saveParallelsToCache(reconnectedParallels).catch(() => {});
       }
 
       // Sync pending offline toggles

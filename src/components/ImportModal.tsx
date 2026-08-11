@@ -268,21 +268,26 @@ async function batchUpsert(
 
   const uniqueCardNumbers = Array.from(cardMap.keys());
 
-  // Fetch existing cards to get their IDs
-  const { data: existingCards, error: fetchError } = await supabase
-    .from('cards')
-    .select('id, card_number')
-    .in('card_number', uniqueCardNumbers);
-
-  if (fetchError) {
-    throw new Error(`Supabase fetch failed: ${fetchError.message}`);
-  }
-
-  // Build card_number → id map from existing cards
+  // Fetch existing cards to get their IDs (in batches to avoid URL length limits)
   const cardNumberToId = new Map<number, string>();
-  if (existingCards) {
-    for (const card of existingCards) {
-      cardNumberToId.set(card.card_number, card.id);
+  {
+    const FETCH_BATCH_SIZE = 500;
+    for (let i = 0; i < uniqueCardNumbers.length; i += FETCH_BATCH_SIZE) {
+      const batch = uniqueCardNumbers.slice(i, i + FETCH_BATCH_SIZE);
+      const { data: existingCards, error: fetchError } = await supabase
+        .from('cards')
+        .select('id, card_number')
+        .in('card_number', batch);
+
+      if (fetchError) {
+        throw new Error(`Supabase fetch failed: ${fetchError.message}`);
+      }
+
+      if (existingCards) {
+        for (const card of existingCards) {
+          cardNumberToId.set(card.card_number, card.id);
+        }
+      }
     }
   }
 
@@ -302,35 +307,40 @@ async function batchUpsert(
 
   let inserted = 0;
 
-  // Insert only new cards
+  // Insert only new cards (in batches to avoid Supabase row limits)
   if (newCardRows.length > 0) {
-    const { data: insertedCards, error: insertError } = await supabase
-      .from('cards')
-      .insert(newCardRows)
-      .select('id, card_number');
+    const BATCH_SIZE = 500;
+    for (let i = 0; i < newCardRows.length; i += BATCH_SIZE) {
+      const batch = newCardRows.slice(i, i + BATCH_SIZE);
+      const { data: insertedCards, error: insertError } = await supabase
+        .from('cards')
+        .insert(batch)
+        .select('id, card_number');
 
-    if (insertError) {
-      throw new Error(`Supabase card insert failed: ${insertError.message}`);
-    }
-
-    if (insertedCards) {
-      for (const card of insertedCards) {
-        cardNumberToId.set(card.card_number, card.id);
+      if (insertError) {
+        throw new Error(`Supabase card insert failed: ${insertError.message}`);
       }
-      inserted = insertedCards.length;
+
+      if (insertedCards) {
+        for (const card of insertedCards) {
+          cardNumberToId.set(card.card_number, card.id);
+        }
+        inserted += insertedCards.length;
+      }
     }
   }
 
   const skipped = uniqueCardNumbers.length - inserted;
 
-  // Build parallel records from all valid rows
+  // Build parallel records from rows with non-null parallel_name (excludes Base)
   const parallelRecords = rows
+    .filter((row) => row.parallel_name !== null)
     .map((row) => {
       const cardId = cardNumberToId.get(parseInt(row.card_number, 10));
       if (!cardId) return null;
       return {
         card_id: cardId,
-        parallel_name: row.parallel_name,
+        parallel_name: row.parallel_name!,
         collected: false,
       };
     })
@@ -339,16 +349,20 @@ async function batchUpsert(
   let parallelsCreated = 0;
 
   if (parallelRecords.length > 0) {
-    const { data: parallelData, error: parallelError } = await supabase
-      .from('card_parallels')
-      .upsert(parallelRecords, { onConflict: 'card_id,parallel_name', ignoreDuplicates: true })
-      .select('id');
+    const BATCH_SIZE = 500;
+    for (let i = 0; i < parallelRecords.length; i += BATCH_SIZE) {
+      const batch = parallelRecords.slice(i, i + BATCH_SIZE);
+      const { data: parallelData, error: parallelError } = await supabase
+        .from('card_parallels')
+        .upsert(batch, { onConflict: 'card_id,parallel_name', ignoreDuplicates: true })
+        .select('id');
 
-    if (parallelError) {
-      throw new Error(`Supabase parallel upsert failed: ${parallelError.message}`);
+      if (parallelError) {
+        throw new Error(`Supabase parallel upsert failed: ${parallelError.message}`);
+      }
+
+      parallelsCreated += parallelData?.length ?? 0;
     }
-
-    parallelsCreated = parallelData?.length ?? 0;
   }
 
   return { inserted, skipped, parallelsCreated };

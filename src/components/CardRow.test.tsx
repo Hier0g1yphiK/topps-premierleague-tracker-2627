@@ -24,7 +24,7 @@ function makeParallel(overrides: Partial<CardParallel> = {}): CardParallel {
   return {
     id: 'parallel-1',
     card_id: 'card-1',
-    parallel_name: 'Base',
+    parallel_name: 'Blue Voltage',
     collected: false,
     date_collected: null,
     created_at: '2025-01-01T00:00:00Z',
@@ -37,7 +37,6 @@ const defaultProps = () => ({
   onToggleCollected: vi.fn(),
   isToggling: false,
   parallels: [
-    makeParallel({ id: 'p-1', parallel_name: 'Base', collected: true }),
     makeParallel({ id: 'p-2', parallel_name: 'Blue Voltage', collected: false }),
     makeParallel({ id: 'p-3', parallel_name: 'Gold /50', collected: false }),
   ],
@@ -55,8 +54,9 @@ describe('CardRowMobile', () => {
     expect(screen.getByText(/Premium/)).toBeInTheDocument();
   });
 
-  it('shows base toggle button with correct aria-label when base is collected', () => {
+  it('shows base toggle button reading from card.collected', () => {
     const props = defaultProps();
+    props.card = makeCard({ collected: true });
     render(<CardRowMobile {...props} />);
 
     expect(
@@ -64,30 +64,38 @@ describe('CardRowMobile', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows uncollected state when card.collected is false', () => {
+    const props = defaultProps();
+    props.card = makeCard({ collected: false });
+    render(<CardRowMobile {...props} />);
+
+    expect(
+      screen.getByRole('button', { name: 'Mark base as collected' })
+    ).toBeInTheDocument();
+  });
+
   it('shows parallels dropdown trigger with collected count', () => {
     const props = defaultProps();
     render(<CardRowMobile {...props} />);
 
-    // Non-base parallels: Blue Voltage (uncollected) + Gold /50 (uncollected) = 0/2
+    // All parallels: Blue Voltage (uncollected) + Gold /50 (uncollected) = 0/2
     expect(
       screen.getByRole('button', { name: /0 of 2 parallels collected/i })
     ).toBeInTheDocument();
   });
 
-  it('base toggle delegates to Base parallel when one exists', () => {
+  it('base toggle always calls onToggleCollected', () => {
     const props = defaultProps();
     render(<CardRowMobile {...props} />);
 
     const toggleBtn = screen.getByRole('button', { name: /mark base as/i });
     fireEvent.click(toggleBtn);
 
-    expect(props.onToggleParallel).toHaveBeenCalledWith(
-      expect.objectContaining({ parallel_name: 'Base' })
-    );
-    expect(props.onToggleCollected).not.toHaveBeenCalled();
+    expect(props.onToggleCollected).toHaveBeenCalledWith(props.card);
+    expect(props.onToggleParallel).not.toHaveBeenCalled();
   });
 
-  it('base toggle calls onToggleCollected when no Base parallel exists', () => {
+  it('base toggle calls onToggleCollected even when parallels exist', () => {
     const props = defaultProps();
     props.parallels = [
       makeParallel({ id: 'p-2', parallel_name: 'Blue Voltage', collected: false }),
@@ -102,21 +110,21 @@ describe('CardRowMobile', () => {
     expect(props.onToggleParallel).not.toHaveBeenCalled();
   });
 
-  it('does not toggle base when base parallel is toggling', () => {
+  it('does not toggle base when isToggling is true', () => {
     const props = defaultProps();
-    props.togglingParallelIds = new Set(['p-1']);
+    props.isToggling = true;
     render(<CardRowMobile {...props} />);
 
     const toggleBtn = screen.getByRole('button', { name: /mark base as/i });
     fireEvent.click(toggleBtn);
 
-    expect(props.onToggleParallel).not.toHaveBeenCalled();
     expect(props.onToggleCollected).not.toHaveBeenCalled();
+    expect(props.onToggleParallel).not.toHaveBeenCalled();
   });
 
-  it('shows reduced opacity when base is toggling', () => {
+  it('shows reduced opacity when isToggling is true', () => {
     const props = defaultProps();
-    props.togglingParallelIds = new Set(['p-1']);
+    props.isToggling = true;
     const { container } = render(<CardRowMobile {...props} />);
 
     const mobileCard = container.firstElementChild;
@@ -130,7 +138,7 @@ describe('CardRowMobile', () => {
     const dropdownBtn = screen.getByRole('button', { name: /0 of 2 parallels collected/i });
     fireEvent.click(dropdownBtn);
 
-    // Should show the non-base parallels in the dropdown
+    // Should show all parallels in the dropdown
     expect(screen.getByText('Blue Voltage')).toBeInTheDocument();
     expect(screen.getByText('Gold /50')).toBeInTheDocument();
   });
@@ -173,8 +181,9 @@ describe('CardRowDesktop', () => {
     expect(screen.getByText('Arsenal')).toBeInTheDocument();
   });
 
-  it('shows base toggle with checkbox-style appearance', () => {
+  it('shows base toggle reading from card.collected', () => {
     const props = defaultProps();
+    props.card = makeCard({ collected: true });
     renderInTable(<CardRowDesktop {...props} />);
 
     expect(
@@ -182,11 +191,11 @@ describe('CardRowDesktop', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows parallels dropdown with collected count for non-base parallels', () => {
+  it('shows parallels dropdown with collected count for all parallels', () => {
     const props = defaultProps();
     renderInTable(<CardRowDesktop {...props} />);
 
-    // Non-base parallels: Blue Voltage (uncollected) + Gold /50 (uncollected) = 0/2
+    // All parallels: Blue Voltage (uncollected) + Gold /50 (uncollected) = 0/2
     expect(
       screen.getByRole('button', { name: /0 of 2 parallels collected/i })
     ).toBeInTheDocument();
@@ -203,20 +212,18 @@ describe('CardRowDesktop', () => {
     expect(screen.getByText('Gold /50')).toBeInTheDocument();
   });
 
-  it('base toggle delegates to Base parallel', () => {
+  it('base toggle always calls onToggleCollected', () => {
     const props = defaultProps();
     renderInTable(<CardRowDesktop {...props} />);
 
     const toggleBtn = screen.getByRole('button', { name: /mark base as/i });
     fireEvent.click(toggleBtn);
 
-    expect(props.onToggleParallel).toHaveBeenCalledWith(
-      expect.objectContaining({ parallel_name: 'Base' })
-    );
-    expect(props.onToggleCollected).not.toHaveBeenCalled();
+    expect(props.onToggleCollected).toHaveBeenCalledWith(props.card);
+    expect(props.onToggleParallel).not.toHaveBeenCalled();
   });
 
-  it('base toggle falls back to onToggleCollected without Base parallel', () => {
+  it('base toggle calls onToggleCollected even when parallels exist', () => {
     const props = defaultProps();
     props.parallels = [
       makeParallel({ id: 'p-2', parallel_name: 'Blue Voltage', collected: false }),
@@ -230,16 +237,16 @@ describe('CardRowDesktop', () => {
     expect(props.onToggleParallel).not.toHaveBeenCalled();
   });
 
-  it('does not toggle base when base parallel is toggling', () => {
+  it('does not toggle base when isToggling is true', () => {
     const props = defaultProps();
-    props.togglingParallelIds = new Set(['p-1']);
+    props.isToggling = true;
     renderInTable(<CardRowDesktop {...props} />);
 
     const toggleBtn = screen.getByRole('button', { name: /mark base as/i });
     fireEvent.click(toggleBtn);
 
-    expect(props.onToggleParallel).not.toHaveBeenCalled();
     expect(props.onToggleCollected).not.toHaveBeenCalled();
+    expect(props.onToggleParallel).not.toHaveBeenCalled();
   });
 
   it('toggling a parallel in the dropdown calls onToggleParallel', () => {
@@ -259,11 +266,9 @@ describe('CardRowDesktop', () => {
     );
   });
 
-  it('shows dash when no non-base parallels exist', () => {
+  it('shows dash when no parallels exist', () => {
     const props = defaultProps();
-    props.parallels = [
-      makeParallel({ id: 'p-1', parallel_name: 'Base', collected: true }),
-    ];
+    props.parallels = [];
     renderInTable(<CardRowDesktop {...props} />);
 
     expect(screen.getByText('—')).toBeInTheDocument();

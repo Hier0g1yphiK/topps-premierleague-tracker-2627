@@ -75,18 +75,26 @@ function createMockCard(overrides: Partial<Card> = {}): Card {
 
 // --- Setup mock chain for fetching cards ---
 function setupSupabaseFetch(cards: Card[]) {
-  mockOrder.mockResolvedValue({ data: cards, error: null });
-  mockSelect.mockReturnValue({ order: mockOrder });
   mockFrom.mockImplementation((table: string) => {
     if (table === 'card_parallels') {
       return {
-        select: () => Promise.resolve({ data: [], error: null }),
+        select: () => ({
+          range: () => Promise.resolve({ data: [], error: null }),
+        }),
         upsert: mockUpsert,
         update: mockUpdate,
       };
     }
     return {
-      select: () => ({ order: mockOrder }),
+      select: () => ({
+        order: () => ({
+          range: () => Promise.resolve({ data: cards, error: null }),
+        }),
+        in: () => Promise.resolve({ data: [], error: null }),
+      }),
+      insert: () => ({
+        select: () => Promise.resolve({ data: [], error: null }),
+      }),
       upsert: mockUpsert,
       update: mockUpdate,
     };
@@ -125,30 +133,28 @@ describe('Integration: CSV import → cards appear in list', () => {
 
     // Track fetch call count to return empty first, then imported cards after import
     let fetchCount = 0;
-    const mockOrderFn = vi.fn().mockImplementation(() => {
-      fetchCount++;
-      if (fetchCount <= 1) {
-        return Promise.resolve({ data: [], error: null });
-      }
-      return Promise.resolve({ data: importedCards, error: null });
-    });
-
-    const mockUpsertSelect = vi.fn().mockResolvedValue({
-      data: [{ id: 'id-1' }, { id: 'id-2' }],
-      error: null,
-    });
 
     mockFrom.mockImplementation((table: string) => {
       if (table === 'card_parallels') {
         return {
-          select: () => Promise.resolve({ data: [], error: null }),
+          select: () => ({
+            range: () => Promise.resolve({ data: [], error: null }),
+          }),
           upsert: () => ({ select: vi.fn().mockResolvedValue({ data: [], error: null }) }),
           update: mockUpdate,
         };
       }
       return {
         select: () => ({
-          order: mockOrderFn,
+          order: () => ({
+            range: () => {
+              fetchCount++;
+              if (fetchCount <= 1) {
+                return Promise.resolve({ data: [], error: null });
+              }
+              return Promise.resolve({ data: importedCards, error: null });
+            },
+          }),
           in: () => Promise.resolve({ data: [], error: null }),
         }),
         insert: () => ({
@@ -160,7 +166,7 @@ describe('Integration: CSV import → cards appear in list', () => {
             error: null,
           }),
         }),
-        upsert: () => ({ select: mockUpsertSelect }),
+        upsert: () => ({ select: vi.fn().mockResolvedValue({ data: [], error: null }) }),
         update: mockUpdate,
       };
     });
@@ -314,14 +320,18 @@ describe('Integration: Offline mode serves cached data', () => {
     mockFrom.mockImplementation((table: string) => {
       if (table === 'card_parallels') {
         return {
-          select: () => Promise.resolve({ data: null, error: { message: 'Network error' } }),
+          select: () => ({
+            range: () => Promise.resolve({ data: null, error: { message: 'Network error' } }),
+          }),
           upsert: mockUpsert,
           update: mockUpdate,
         };
       }
       return {
         select: () => ({
-          order: vi.fn().mockResolvedValue({ data: null, error: { message: 'Network error' } }),
+          order: () => ({
+            range: () => Promise.resolve({ data: null, error: { message: 'Network error' } }),
+          }),
         }),
         upsert: mockUpsert,
         update: mockUpdate,

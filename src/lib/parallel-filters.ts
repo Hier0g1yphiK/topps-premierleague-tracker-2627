@@ -1,18 +1,6 @@
 import type { Card, CardParallel, ParallelFilterStatus } from '../types';
 
 /**
- * Derives the card-level collected status from its parallels.
- *
- * Returns true if and only if a "Base" parallel exists with collected === true.
- * In all other cases (no Base parallel, or Base parallel with collected === false),
- * returns false.
- */
-export function deriveCardCollectedStatus(parallels: CardParallel[]): boolean {
-  const base = parallels.find((p) => p.parallel_name === 'Base');
-  return base !== undefined && base.collected === true;
-}
-
-/**
  * Filters cards by their parallel completion status.
  *
  * - 'all': returns all cards (no filtering)

@@ -264,14 +264,15 @@ describe('Feature: parallel-tracking, Property 8: CSV parallel deduplication', (
   });
 });
 
-describe('Feature: parallel-tracking, Property 9: Empty parallel name defaults to "Base"', () => {
+describe('Feature: parallel-tracking, Property 9: Empty parallel name results in null (base card)', () => {
   /**
    * **Validates: Requirements 6.5, 7.1**
    *
    * For any CSV row where the parallel field is empty, missing, or contains only
-   * whitespace, the parser SHALL assign parallel_name as "Base".
+   * whitespace, or is "Base", the parser SHALL assign parallel_name as null
+   * (the card itself represents the base variant via cards.collected).
    */
-  it('empty parallel field results in parallel_name === "Base"', () => {
+  it('empty parallel field results in parallel_name === null', () => {
     fc.assert(
       fc.property(
         fc.array(
@@ -291,7 +292,7 @@ describe('Feature: parallel-tracking, Property 9: Empty parallel name defaults t
           const parsed = parseCSV(csv);
 
           for (const row of parsed) {
-            expect(row.parallel_name).toBe('Base');
+            expect(row.parallel_name).toBeNull();
           }
         }
       ),
@@ -299,7 +300,35 @@ describe('Feature: parallel-tracking, Property 9: Empty parallel name defaults t
     );
   });
 
-  it('CSV without parallel column assigns "Base" to all rows (legacy format)', () => {
+  it('"Base" parallel field results in parallel_name === null', () => {
+    fc.assert(
+      fc.property(
+        fc.array(
+          fc.record({
+            card_number: validCardNumber,
+            set_name: safeCsvString,
+            set_card_number: safeCsvString,
+            player: safeCsvString,
+            team: safeCsvString,
+            notes: fc.constant(''),
+            parallel: fc.constant('Base'),
+          }),
+          { minLength: 1, maxLength: 10 }
+        ),
+        (rows) => {
+          const csv = buildCSVWithParallel(rows);
+          const parsed = parseCSV(csv);
+
+          for (const row of parsed) {
+            expect(row.parallel_name).toBeNull();
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('CSV without parallel column assigns null to all rows (legacy format)', () => {
     fc.assert(
       fc.property(
         fc.array(validRowWithParallelArb, { minLength: 1, maxLength: 10 }),
@@ -309,7 +338,7 @@ describe('Feature: parallel-tracking, Property 9: Empty parallel name defaults t
           const parsed = parseCSV(csv);
 
           for (const row of parsed) {
-            expect(row.parallel_name).toBe('Base');
+            expect(row.parallel_name).toBeNull();
           }
         }
       ),
@@ -322,29 +351,55 @@ describe('Feature: parallel-tracking, Property 10: CSV import/export round-trip'
   /**
    * **Validates: Requirements 6.8**
    *
-   * For any valid CSV content, importing → exporting → re-importing produces equivalent state.
+   * For any valid CSV content with non-Base parallels, importing → exporting → re-importing produces equivalent state.
    * We test this by: parse CSV → rebuild CSV from parsed rows → re-parse → compare.
+   * Note: Rows with parallel_name === null (Base) are excluded from the round-trip
+   * since they are not exported as parallel records.
    */
-  it('parse → rebuild → re-parse produces equivalent parsed rows', () => {
+  it('parse → rebuild → re-parse produces equivalent parsed rows for non-Base parallels', () => {
+    // Use only non-Base parallel names for this test
+    const nonBaseParallelNameArb = fc.oneof(
+      fc.constant('Blue Voltage'),
+      fc.constant('Gold /50'),
+      fc.constant('FoilFractor 1/1'),
+      fc.constant('Aqua Sparkle /499'),
+      fc.constant('Silver'),
+      fc.constant('Purple /25'),
+      fc.constant('Red /10'),
+      fc.constant('Green /99')
+    );
+
+    const nonBaseRowArb = fc.record({
+      card_number: validCardNumber,
+      set_name: safeCsvString,
+      set_card_number: safeCsvString,
+      player: safeCsvString,
+      team: safeCsvString,
+      notes: fc.oneof(fc.constant(''), safeCsvString),
+      parallel: nonBaseParallelNameArb,
+    });
+
     fc.assert(
       fc.property(
-        fc.array(validRowWithParallelArb, { minLength: 1, maxLength: 15 }),
+        fc.array(nonBaseRowArb, { minLength: 1, maxLength: 15 }),
         (rows) => {
           // First import: build CSV and parse
           const csv1 = buildCSVWithParallel(rows);
           const parsed1 = parseCSV(csv1);
           const valid1 = parsed1.filter((row, i) => validateRow(row, i + 1).valid);
 
-          // Export: rebuild CSV from parsed valid rows
-          const exportedRows: RowDataWithParallel[] = valid1.map((r) => ({
-            card_number: r.card_number,
-            set_name: r.set_name,
-            set_card_number: r.set_card_number,
-            player: r.player,
-            team: r.team,
-            notes: r.notes ?? '',
-            parallel: r.parallel_name,
-          }));
+          // Export: rebuild CSV from parsed valid rows (only non-null parallel_name)
+          const exportedRows: RowDataWithParallel[] = valid1
+            .filter((r) => r.parallel_name !== null)
+            .map((r) => ({
+              card_number: r.card_number,
+              set_name: r.set_name,
+              set_card_number: r.set_card_number,
+              player: r.player,
+              team: r.team,
+              notes: r.notes ?? '',
+              parallel: r.parallel_name!,
+            }));
           const csv2 = buildCSVWithParallel(exportedRows);
 
           // Second import: re-parse
@@ -352,16 +407,16 @@ describe('Feature: parallel-tracking, Property 10: CSV import/export round-trip'
           const valid2 = parsed2.filter((row, i) => validateRow(row, i + 1).valid);
 
           // Same number of valid rows
-          expect(valid2.length).toBe(valid1.length);
+          expect(valid2.length).toBe(exportedRows.length);
 
           // Each row's data matches
-          for (let i = 0; i < valid1.length; i++) {
-            expect(valid2[i].card_number).toBe(valid1[i].card_number);
-            expect(valid2[i].set_name).toBe(valid1[i].set_name);
-            expect(valid2[i].set_card_number).toBe(valid1[i].set_card_number);
-            expect(valid2[i].player).toBe(valid1[i].player);
-            expect(valid2[i].team).toBe(valid1[i].team);
-            expect(valid2[i].parallel_name).toBe(valid1[i].parallel_name);
+          for (let i = 0; i < valid2.length; i++) {
+            expect(valid2[i].card_number).toBe(exportedRows[i].card_number);
+            expect(valid2[i].set_name).toBe(exportedRows[i].set_name);
+            expect(valid2[i].set_card_number).toBe(exportedRows[i].set_card_number);
+            expect(valid2[i].player).toBe(exportedRows[i].player);
+            expect(valid2[i].team).toBe(exportedRows[i].team);
+            expect(valid2[i].parallel_name).toBe(exportedRows[i].parallel);
           }
         }
       ),

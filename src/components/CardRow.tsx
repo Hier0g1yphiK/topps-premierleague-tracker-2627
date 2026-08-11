@@ -11,16 +11,6 @@ export interface CardRowProps {
   togglingParallelIds: Set<string>;
 }
 
-/** Find the "Base" parallel for card-level toggle delegation */
-function findBaseParallel(parallels: CardParallel[]): CardParallel | undefined {
-  return parallels.find((p) => p.parallel_name === 'Base');
-}
-
-/** Get non-base parallels */
-function getNonBaseParallels(parallels: CardParallel[]): CardParallel[] {
-  return parallels.filter((p) => p.parallel_name !== 'Base');
-}
-
 /** Parallels dropdown component with multi-select checkboxes */
 function ParallelsDropdown({
   parallels,
@@ -143,22 +133,16 @@ function ParallelsDropdown({
 export function CardRowDesktop({
   card,
   onToggleCollected,
+  isToggling,
   parallels,
   onToggleParallel,
   togglingParallelIds,
 }: CardRowProps) {
-  const baseParallel = findBaseParallel(parallels);
-  const nonBaseParallels = getNonBaseParallels(parallels);
-  const baseCollected = baseParallel?.collected ?? false;
-  const baseIsToggling = baseParallel ? togglingParallelIds.has(baseParallel.id) : false;
+  const baseCollected = card.collected;
 
   const handleBaseToggle = () => {
-    if (baseIsToggling) return;
-    if (baseParallel) {
-      onToggleParallel(baseParallel);
-    } else {
-      onToggleCollected(card);
-    }
+    if (isToggling) return;
+    onToggleCollected(card);
   };
 
   const baseLabel = baseCollected ? 'Mark base as uncollected' : 'Mark base as collected';
@@ -169,7 +153,7 @@ export function CardRowDesktop({
         baseCollected
           ? 'bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50'
           : 'bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700'
-      } ${baseIsToggling ? 'opacity-50' : ''}`}
+      } ${isToggling ? 'opacity-50' : ''}`}
     >
       <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium">{card.card_number}</td>
       <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{card.set_name}</td>
@@ -181,11 +165,11 @@ export function CardRowDesktop({
         <button
           type="button"
           onClick={handleBaseToggle}
-          disabled={baseIsToggling}
+          disabled={isToggling}
           aria-label={baseLabel}
           className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
-          {baseIsToggling ? (
+          {isToggling ? (
             <span className="inline-block w-5 h-5 border-2 border-gray-300 border-t-purple-600 rounded-full animate-spin" aria-label="Toggling" />
           ) : baseCollected ? (
             <span className="inline-flex items-center justify-center w-5 h-5 rounded border bg-green-500 border-green-500 text-white">
@@ -201,7 +185,7 @@ export function CardRowDesktop({
       {/* Parallels dropdown */}
       <td className="px-3 py-3 text-center">
         <ParallelsDropdown
-          parallels={nonBaseParallels}
+          parallels={parallels}
           onToggleParallel={onToggleParallel}
           togglingIds={togglingParallelIds}
         />
@@ -214,22 +198,16 @@ export function CardRowDesktop({
 export function CardRowMobile({
   card,
   onToggleCollected,
+  isToggling,
   parallels,
   onToggleParallel,
   togglingParallelIds,
 }: CardRowProps) {
-  const baseParallel = findBaseParallel(parallels);
-  const nonBaseParallels = getNonBaseParallels(parallels);
-  const baseCollected = baseParallel?.collected ?? false;
-  const baseIsToggling = baseParallel ? togglingParallelIds.has(baseParallel.id) : false;
+  const baseCollected = card.collected;
 
   const handleBaseToggle = () => {
-    if (baseIsToggling) return;
-    if (baseParallel) {
-      onToggleParallel(baseParallel);
-    } else {
-      onToggleCollected(card);
-    }
+    if (isToggling) return;
+    onToggleCollected(card);
   };
 
   const baseLabel = baseCollected ? 'Mark base as uncollected' : 'Mark base as collected';
@@ -240,7 +218,7 @@ export function CardRowMobile({
         baseCollected
           ? 'bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800'
           : 'bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700'
-      } ${baseIsToggling ? 'opacity-50' : ''}`}
+      } ${isToggling ? 'opacity-50' : ''}`}
     >
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
@@ -261,11 +239,11 @@ export function CardRowMobile({
           <button
             type="button"
             onClick={handleBaseToggle}
-            disabled={baseIsToggling}
+            disabled={isToggling}
             aria-label={baseLabel}
             className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            {baseIsToggling ? (
+            {isToggling ? (
               <span className="inline-block w-6 h-6 border-2 border-gray-300 border-t-purple-600 rounded-full animate-spin" aria-label="Toggling" />
             ) : baseCollected ? (
               <span className="inline-flex items-center justify-center w-6 h-6 rounded border bg-green-500 border-green-500 text-white">
@@ -280,11 +258,11 @@ export function CardRowMobile({
         </div>
 
         {/* Parallels dropdown row */}
-        {nonBaseParallels.length > 0 && (
+        {parallels.length > 0 && (
           <div className="mt-2 flex items-center gap-2">
             <span className="text-xs text-gray-500 dark:text-gray-400">Parallels:</span>
             <ParallelsDropdown
-              parallels={nonBaseParallels}
+              parallels={parallels}
               onToggleParallel={onToggleParallel}
               togglingIds={togglingParallelIds}
             />

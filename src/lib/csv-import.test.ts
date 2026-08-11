@@ -16,7 +16,7 @@ describe('parseCSV', () => {
       player: 'Erling Haaland',
       team: 'Manchester City',
       notes: 'Top scorer',
-      parallel_name: 'Base',
+      parallel_name: null,
     });
     expect(rows[1]).toEqual({
       card_number: '2',
@@ -25,7 +25,7 @@ describe('parseCSV', () => {
       player: 'Bukayo Saka',
       team: 'Arsenal',
       notes: null,
-      parallel_name: 'Base',
+      parallel_name: null,
     });
   });
 
@@ -72,7 +72,7 @@ describe('validateRow', () => {
     player: 'Erling Haaland',
     team: 'Manchester City',
     notes: null,
-    parallel_name: 'Base',
+    parallel_name: null,
   };
 
   it('accepts a valid row', () => {
