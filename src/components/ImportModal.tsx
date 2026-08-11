@@ -266,37 +266,62 @@ async function batchUpsert(
     }
   }
 
-  const uniqueCardRecords = Array.from(cardMap.values()).map((row) => ({
-    card_number: parseInt(row.card_number, 10),
-    set_name: row.set_name.trim(),
-    set_card_number: row.set_card_number.trim(),
-    player: row.player.trim(),
-    team: row.team.trim(),
-    notes: row.notes,
-    collected: false,
-    user_id: null,
-  }));
+  const uniqueCardNumbers = Array.from(cardMap.keys());
 
-  // Upsert cards with ignoreDuplicates: false so we get back ids for existing cards too
-  const { data: cardData, error: cardError } = await supabase
+  // Fetch existing cards to get their IDs
+  const { data: existingCards, error: fetchError } = await supabase
     .from('cards')
-    .upsert(uniqueCardRecords, { onConflict: 'user_id,card_number', ignoreDuplicates: false })
-    .select('id, card_number');
+    .select('id, card_number')
+    .in('card_number', uniqueCardNumbers);
 
-  if (cardError) {
-    throw new Error(`Supabase card upsert failed: ${cardError.message}`);
+  if (fetchError) {
+    throw new Error(`Supabase fetch failed: ${fetchError.message}`);
   }
 
-  // Build card_number → id map
+  // Build card_number → id map from existing cards
   const cardNumberToId = new Map<number, string>();
-  if (cardData) {
-    for (const card of cardData) {
+  if (existingCards) {
+    for (const card of existingCards) {
       cardNumberToId.set(card.card_number, card.id);
     }
   }
 
-  const inserted = cardData?.length ?? 0;
-  const skipped = uniqueCardRecords.length - inserted;
+  // Determine which cards are new (don't exist yet)
+  const newCardRows = Array.from(cardMap.entries())
+    .filter(([cardNum]) => !cardNumberToId.has(cardNum))
+    .map(([, row]) => ({
+      card_number: parseInt(row.card_number, 10),
+      set_name: row.set_name.trim(),
+      set_card_number: row.set_card_number.trim(),
+      player: row.player.trim(),
+      team: row.team.trim(),
+      notes: row.notes,
+      collected: false,
+      user_id: null,
+    }));
+
+  let inserted = 0;
+
+  // Insert only new cards
+  if (newCardRows.length > 0) {
+    const { data: insertedCards, error: insertError } = await supabase
+      .from('cards')
+      .insert(newCardRows)
+      .select('id, card_number');
+
+    if (insertError) {
+      throw new Error(`Supabase card insert failed: ${insertError.message}`);
+    }
+
+    if (insertedCards) {
+      for (const card of insertedCards) {
+        cardNumberToId.set(card.card_number, card.id);
+      }
+      inserted = insertedCards.length;
+    }
+  }
+
+  const skipped = uniqueCardNumbers.length - inserted;
 
   // Build parallel records from all valid rows
   const parallelRecords = rows

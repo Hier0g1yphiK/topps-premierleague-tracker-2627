@@ -1,4 +1,4 @@
-import type { Card, FilterState } from '../types';
+import type { Card, CardParallel, FilterState } from '../types';
 
 /**
  * Filters cards by case-insensitive substring match on player OR team.
@@ -29,20 +29,28 @@ export function filterBySetName(cards: Card[], setName: string | null): Card[] {
 
 /**
  * Filters cards by collected status.
- * 'all' returns all cards, 'collected' returns collected===true,
- * 'missing' returns collected===false.
+ * 'all' returns all cards, 'collected' returns cards with at least one parallel collected,
+ * 'missing' returns cards with no parallels collected.
+ * Falls back to card.collected if no parallels exist for a card.
  */
 export function filterByCollectedStatus(
   cards: Card[],
-  status: 'all' | 'collected' | 'missing'
+  status: 'all' | 'collected' | 'missing',
+  parallelsMap?: Map<string, CardParallel[]>
 ): Card[] {
   if (status === 'all') {
     return cards;
   }
-  if (status === 'collected') {
-    return cards.filter((card) => card.collected === true);
-  }
-  return cards.filter((card) => card.collected === false);
+
+  return cards.filter((card) => {
+    const parallels = parallelsMap?.get(card.id);
+    // Determine collected: any parallel collected, or fall back to card.collected
+    const isCollected = parallels && parallels.length > 0
+      ? parallels.some((p) => p.collected === true)
+      : card.collected === true;
+
+    return status === 'collected' ? isCollected : !isCollected;
+  });
 }
 
 /**
@@ -50,7 +58,11 @@ export function filterByCollectedStatus(
  * If all filters are at default (empty search, null setName, 'all' status),
  * returns the original array reference.
  */
-export function applyFilters(cards: Card[], filters: FilterState): Card[] {
+export function applyFilters(
+  cards: Card[],
+  filters: FilterState,
+  parallelsMap?: Map<string, CardParallel[]>
+): Card[] {
   const { searchText, setName, collectedStatus } = filters;
 
   // Short-circuit if all filters are at their defaults
@@ -61,7 +73,7 @@ export function applyFilters(cards: Card[], filters: FilterState): Card[] {
   let result = cards;
   result = filterBySearch(result, searchText);
   result = filterBySetName(result, setName);
-  result = filterByCollectedStatus(result, collectedStatus);
+  result = filterByCollectedStatus(result, collectedStatus, parallelsMap);
   return result;
 }
 

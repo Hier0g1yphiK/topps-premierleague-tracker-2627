@@ -200,8 +200,8 @@ export function AppShell() {
 
   // Derived state via useMemo
   const filteredCards = useMemo(
-    () => applyFilters(cards, filters),
-    [cards, filters]
+    () => applyFilters(cards, filters, parallelsMap),
+    [cards, filters, parallelsMap]
   );
 
   const filteredByParallel = useMemo(
