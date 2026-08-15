@@ -6,7 +6,7 @@ A Progressive Web App for tracking your Topps Premier League 2026-27 sticker/car
 
 - **Collection tracking** — Toggle cards as collected/uncollected with optimistic UI
 - **Parallel tracking** — Track named parallel variants (Blue Voltage, Gold /50, etc.) independently from the base card
-- **Filtering & search** — Filter by player/team name, set, collected status, or parallel completion
+- **Filtering & search** — Filter by player/team name, card number, set card number, set, collected status, or parallel completion
 - **Sorting** — Sort by card number, set, player, team, or collected status
 - **CSV import** — Bulk-import card data and parallels from a CSV file (batched for large datasets)
 - **Real-time sync** — Live updates across devices via Supabase Realtime

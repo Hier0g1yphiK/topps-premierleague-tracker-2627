@@ -1,7 +1,8 @@
 import type { Card, CardParallel, FilterState } from '../types';
 
 /**
- * Filters cards by case-insensitive substring match on player OR team.
+ * Filters cards by case-insensitive substring match on player, team,
+ * card_number, or set_card_number.
  * Returns all cards if searchText is empty.
  */
 export function filterBySearch(cards: Card[], searchText: string): Card[] {
@@ -12,7 +13,9 @@ export function filterBySearch(cards: Card[], searchText: string): Card[] {
   return cards.filter(
     (card) =>
       card.player.toLowerCase().includes(lower) ||
-      card.team.toLowerCase().includes(lower)
+      card.team.toLowerCase().includes(lower) ||
+      String(card.card_number).includes(lower) ||
+      card.set_card_number.toLowerCase().includes(lower)
   );
 }
 
