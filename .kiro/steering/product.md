@@ -7,7 +7,7 @@ Topps Premier League Tracker 26/27 is a PWA for tracking a Topps Premier League 
 - View a full list of cards in the collection with their collected status
 - Toggle cards as collected/uncollected with optimistic UI updates
 - Track parallel variants (Blue Voltage, Gold /50, etc.) separately from the base card
-- Filter cards by player/team name, card number, set card number, set name, collected status, and parallel completion
+- Filter cards by player/team name, card number, set card number, set name, collected status, and parallel completion (search is diacritic-insensitive — e.g. "moises" matches "Moisés")
 - Sort cards by any column (card number, set, player, team, collected)
 - Import card data from CSV files (supports parallel column for variant tracking)
 - Real-time sync across devices via Supabase Realtime subscriptions

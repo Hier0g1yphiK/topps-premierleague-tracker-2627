@@ -58,3 +58,4 @@ Stored in `.env` (gitignored). Required:
 - Accessibility: use aria-labels, semantic HTML, keyboard navigation
 - **Base card vs. parallels**: `cards.collected` is the single source of truth for base-card status. Only named variants (not "Base") go into `card_parallels`. CSV rows with empty or "Base" parallel column do NOT create a parallel record.
 - **Supabase pagination**: all fetches use `.range()` pagination (page size 1000) to handle datasets exceeding Supabase's default row limit. All inserts/upserts batch in groups of 500.
+- **Diacritic-insensitive search**: search uses `String.normalize('NFD')` + combining-mark removal so accented characters match their ASCII equivalents (e.g. "moises" matches "Moisés"). Implemented via `removeDiacritics()` in `src/lib/filters.ts`.

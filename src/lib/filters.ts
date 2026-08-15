@@ -1,21 +1,29 @@
 import type { Card, CardParallel, FilterState } from '../types';
 
 /**
- * Filters cards by case-insensitive substring match on player, team,
- * card_number, or set_card_number.
+ * Strips diacritics/accents from a string by decomposing to NFD form
+ * and removing combining marks. e.g. "Moisés" → "Moises"
+ */
+export function removeDiacritics(text: string): string {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Filters cards by case-insensitive, diacritic-insensitive substring match
+ * on player, team, card_number, or set_card_number.
  * Returns all cards if searchText is empty.
  */
 export function filterBySearch(cards: Card[], searchText: string): Card[] {
   if (!searchText) {
     return cards;
   }
-  const lower = searchText.toLowerCase();
+  const lower = removeDiacritics(searchText.toLowerCase());
   return cards.filter(
     (card) =>
-      card.player.toLowerCase().includes(lower) ||
-      card.team.toLowerCase().includes(lower) ||
+      removeDiacritics(card.player.toLowerCase()).includes(lower) ||
+      removeDiacritics(card.team.toLowerCase()).includes(lower) ||
       String(card.card_number).includes(lower) ||
-      card.set_card_number.toLowerCase().includes(lower)
+      removeDiacritics(card.set_card_number.toLowerCase()).includes(lower)
   );
 }
 

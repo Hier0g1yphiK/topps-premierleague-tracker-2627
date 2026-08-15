@@ -28,7 +28,7 @@ src/
 │   └── useToggleParallel.ts   # Optimistic toggle for parallel collected status
 ├── lib/                     # Pure logic / utilities (no React)
 │   ├── supabase.ts          # Supabase client singleton
-│   ├── filters.ts           # Card filtering logic (search, set, collected status)
+│   ├── filters.ts           # Card filtering logic (diacritic-insensitive search, set, collected status)
 │   ├── parallel-filters.ts  # Parallel-level filtering (all/has_uncollected/all_collected)
 │   ├── sort.ts              # Card sorting logic
 │   ├── parallel-sort.ts     # Parallel sorting (collected first, then alphabetical)
