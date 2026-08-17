@@ -1,5 +1,9 @@
 -- Migration: Add Row Level Security policies restricting access to a single authorized user.
--- Replace 'REPLACE_WITH_YOUR_EMAIL' below with your actual email address before running.
+--
+-- SETUP: Before running this migration, set your allowed email as a database setting:
+--   ALTER DATABASE postgres SET app.allowed_email = 'you@example.com';
+--
+-- This avoids hardcoding the email in policy definitions.
 
 -- ============================================================
 -- CARDS TABLE
@@ -24,8 +28,8 @@ END $$;
 CREATE POLICY "Authorized user full access"
   ON cards
   FOR ALL
-  USING (auth.jwt() ->> 'email' = 'REPLACE_WITH_YOUR_EMAIL')
-  WITH CHECK (auth.jwt() ->> 'email' = 'REPLACE_WITH_YOUR_EMAIL');
+  USING (auth.jwt() ->> 'email' = current_setting('app.allowed_email'))
+  WITH CHECK (auth.jwt() ->> 'email' = current_setting('app.allowed_email'));
 
 -- ============================================================
 -- CARD_PARALLELS TABLE
@@ -50,5 +54,5 @@ END $$;
 CREATE POLICY "Authorized user full access"
   ON card_parallels
   FOR ALL
-  USING (auth.jwt() ->> 'email' = 'REPLACE_WITH_YOUR_EMAIL')
-  WITH CHECK (auth.jwt() ->> 'email' = 'REPLACE_WITH_YOUR_EMAIL');
+  USING (auth.jwt() ->> 'email' = current_setting('app.allowed_email'))
+  WITH CHECK (auth.jwt() ->> 'email' = current_setting('app.allowed_email'));
