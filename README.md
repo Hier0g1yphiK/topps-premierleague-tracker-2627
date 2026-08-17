@@ -39,12 +39,34 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` with your Supabase project URL and anon key:
+Edit `.env` with your Supabase project URL, anon key, and authorized email:
 
 ```
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_ALLOWED_EMAIL=your-google-email@example.com
 ```
+
+### Authentication Setup (Google OAuth)
+
+1. **Enable Google provider in Supabase:**
+   - Go to your Supabase dashboard → Authentication → Providers → Google
+   - Toggle Google provider to enabled
+   - Note the **Callback URL** shown (e.g. `https://your-project.supabase.co/auth/v1/callback`)
+
+2. **Set up Google Cloud OAuth credentials:**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials
+   - Create an OAuth 2.0 Client ID (Web application type)
+   - Add `https://your-project.supabase.co/auth/v1/callback` as an Authorized redirect URI
+   - Copy the Client ID and Client Secret back into the Supabase Google provider settings
+
+3. **Set your authorized email:**
+   - Set `VITE_ALLOWED_EMAIL` in `.env` to the Google account email that should have access
+   - Only this email address can use the app; all others will see an "unauthorized" message
+
+4. **Apply the RLS migration:**
+   - Edit `supabase/migrations/20260815000000_add_auth_rls_policies.sql` — replace `REPLACE_WITH_YOUR_EMAIL` with your actual email address
+   - Run the migration against your Supabase project (e.g. via `supabase db push` or the SQL editor in the dashboard)
 
 ### Development
 

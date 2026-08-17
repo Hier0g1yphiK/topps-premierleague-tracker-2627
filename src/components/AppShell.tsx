@@ -7,6 +7,7 @@ import { useToggleCollected } from '../hooks/useToggleCollected';
 import { useToggleParallel } from '../hooks/useToggleParallel';
 import { useServiceWorker } from '../hooks/useServiceWorker';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { useAuthContext } from '../hooks/useAuthContext';
 import { applyFilters, extractSetNames } from '../lib/filters';
 import { filterByParallelStatus } from '../lib/parallel-filters';
 import { sortCards } from '../lib/sort';
@@ -52,6 +53,7 @@ export function AppShell() {
   const isOffline = !isOnline;
   const { needsRefresh, updateServiceWorker } = useServiceWorker();
   const { isDark, toggle: toggleDarkMode } = useDarkMode();
+  const { signOut } = useAuthContext();
 
   // Toggle parallel hook
   const { toggleParallel, togglingIds: togglingParallelIds } = useToggleParallel(supabase, setParallels);
@@ -364,6 +366,16 @@ export function AppShell() {
                 />
               </svg>
               <span className="hidden sm:inline">Import</span>
+            </button>
+            <button
+              type="button"
+              onClick={signOut}
+              className="inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-purple-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-white min-h-[44px] min-w-[44px]"
+              aria-label="Sign out"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
             </button>
           </div>
         </div>

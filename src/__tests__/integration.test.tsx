@@ -2,8 +2,25 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import 'fake-indexeddb/auto';
 import { AppShell } from '../components/AppShell';
+import { AuthContext } from '../lib/auth-context';
 import { saveCardsToCache } from '../lib/offline-cache';
 import type { Card } from '../types';
+import type { AuthState } from '../hooks/useAuth';
+import type { ReactNode } from 'react';
+
+// --- Auth wrapper for tests ---
+const mockAuthState: AuthState = {
+  session: null,
+  user: { id: 'test-user', email: 'test@example.com' } as AuthState['user'],
+  isLoading: false,
+  isAuthorized: true,
+  signInWithGoogle: vi.fn(),
+  signOut: vi.fn(),
+};
+
+function AuthWrapper({ children }: { children: ReactNode }) {
+  return <AuthContext.Provider value={mockAuthState}>{children}</AuthContext.Provider>;
+}
 
 // --- Mock window.matchMedia ---
 Object.defineProperty(window, 'matchMedia', {
